@@ -1,10 +1,12 @@
 [workspace]
 resolver = "3"
-members = ["bspcore", "bspc"]
+
+# Right now, we just have bspcore, which defines the core library and compiler executable.
+# Extensions should be added later, as other packages that depend on bspcore.
+members = ["bspcore"]
 
 [workspace.package]
 version = "0.1.0"
 authors = ["NoodleCollie"]
-description = "A short description of my package"
 documentation = "https://example.com/bar"
 edition = "2024"

@@ -3,12 +3,5 @@
 version = 4
 
 [[package]]
-name = "bspc"
-version = "0.1.0"
-dependencies = [
- "bspcore",
-]
-
-[[package]]
 name = "bspcore"
 version = "0.1.0"

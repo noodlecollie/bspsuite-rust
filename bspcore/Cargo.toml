@@ -1,7 +1,15 @@
 [package]
 name = "bspcore"
+description = "Launcher and core algorithms for the bspsuite compiler"
 
 version.workspace = true
 authors.workspace = true
 documentation.workspace = true
 edition.workspace = true
+
+[[bin]]
+name = "bspsuite"
+
+[lib]
+name = "bspcore"
+crate-type = ["cdylib", "lib"]
