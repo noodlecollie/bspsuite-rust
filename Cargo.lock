@@ -6,9 +6,9 @@ version = 4
 name = "bspc"
 version = "0.1.0"
 dependencies = [
- "libbspsuite",
+ "bspcore",
 ]
 
 [[package]]
-name = "libbspsuite"
+name = "bspcore"
 version = "0.1.0"

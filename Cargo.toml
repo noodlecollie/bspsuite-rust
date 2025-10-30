@@ -1,9 +1,10 @@
 [workspace]
 resolver = "3"
-members = ["libbspsuite", "bspc"]
+members = ["bspcore", "bspc"]
 
 [workspace.package]
 version = "0.1.0"
 authors = ["NoodleCollie"]
 description = "A short description of my package"
 documentation = "https://example.com/bar"
+edition = "2024"

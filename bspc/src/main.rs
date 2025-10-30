@@ -1,8 +1,6 @@
-use libbspsuite::add;
+use bspcore;
 
 fn main()
 {
-	let a = 1;
-	let b = 2;
-	println!("Hello, world! {a} + {b} = {}", add(a, b));
+	bspcore::entrypoint(&std::env::args().collect());
 }

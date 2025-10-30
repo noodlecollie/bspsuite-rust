@@ -1,9 +1,7 @@
 [package]
-name = "libbspsuite"
-edition = "2024"
+name = "bspcore"
 
 version.workspace = true
 authors.workspace = true
 documentation.workspace = true
-
-[dependencies]
+edition.workspace = true
