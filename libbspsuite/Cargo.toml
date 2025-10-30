@@ -1,0 +1,9 @@
+[package]
+name = "libbspsuite"
+edition = "2024"
+
+version.workspace = true
+authors.workspace = true
+documentation.workspace = true
+
+[dependencies]

@@ -1,0 +1,34 @@
+# Notes for future me (or anyone else) while I'm learning:
+# - https://rust-lang.github.io/rustfmt lists the available config options.
+# - Some options (as of 1.8.0, this applies to brace styles) are listed
+#   as "unstable", presumably as their behaviour is in active development.
+#   Unstable options need `unstable_features = true`, and need a nightly
+#   build of rustfmt.
+# - To add a nightly build of rustfmt, run `cargo +nightly fmt`
+#   as per https://stackoverflow.com/a/73457375/2054335.
+# - To enable nightly options in VS code, add this to your settings:
+#     "rust-analyzer.rustfmt.extraArgs": [
+#         "+nightly"
+#     ]
+#
+# This appears to be a much nicer tool than Swift's formatter, which
+# is very opinionated. Opinions are great until you come across one
+# that doesn't match what you need, and refuses to compromise.
+#
+# Some of the newer reordering settings are set to true below, so that
+# I can get acquainted with the regular conventions before I've had
+# time to form any strong opinions of my own.
+
+unstable_features = true
+brace_style = "AlwaysNextLine"
+control_brace_style = "AlwaysNextLine"
+empty_item_single_line = false
+hard_tabs = true
+normalize_comments = true
+normalize_doc_attributes = true
+reorder_impl_items = true
+reorder_imports = true
+group_imports = "StdExternalCrate"
+reorder_modules = true
+trailing_semicolon = true
+wrap_comments = true
