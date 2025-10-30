@@ -25,14 +25,3 @@ pub fn entrypoint(args: &Vec<String>) -> i32
 
 	return 0;
 }
-
-#[cfg(test)]
-mod tests
-{
-	// use super::*;
-
-	#[test]
-	fn fixme()
-	{
-	}
-}
