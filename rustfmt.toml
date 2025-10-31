@@ -10,6 +10,16 @@
 #     "rust-analyzer.rustfmt.extraArgs": [
 #         "+nightly"
 #     ]
+# - To enable nightly options in Zed, add this to your settings:
+#     "lsp": {
+#       "rust-analyzer": {
+#         "initialization_options": {
+#           "rustfmt": {
+#             "extraArgs": ["+nightly"]
+#           }
+#         }
+#       }
+#     }
 #
 # This appears to be a much nicer tool than Swift's formatter, which
 # is very opinionated. Opinions are great until you come across one

@@ -5,10 +5,10 @@ use std::os::raw::c_char;
 
 mod utils;
 
-use super::entrypoint;
+use super::run_from_shell_arguments;
 
 // Function prototype taken from https://paandahl.github.io/rust-interop/c/shared-types.html
 pub extern "C" fn libbspsuite_entrypoint(argc: usize, argv: *const *const c_char) -> c_int
 {
-	return entrypoint(&utils::unsafe_argv_to_string_vec(argc, argv));
+	return run_from_shell_arguments(&utils::unsafe_argv_to_string_vec(argc, argv));
 }
