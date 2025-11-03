@@ -1,18 +1,16 @@
 [package]
-name = "bspcore"
-description = "Launcher and core algorithms for the bspsuite compiler"
+name = "bspsuite-core"
+description = "Core algorithms for the BSPSuite compiler"
 
 version.workspace = true
 authors.workspace = true
 documentation.workspace = true
 edition.workspace = true
 
-[[bin]]
-name = "bspsuite"
-
 [lib]
 name = "bspcore"
 crate-type = ["cdylib", "lib"]
 
 [dependencies]
+clap = { version = "4.5.51", features = ["derive"] }
 glam = "0.30.9"

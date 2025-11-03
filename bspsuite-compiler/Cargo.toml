@@ -1,0 +1,14 @@
+[package]
+name = "bspsuite-compiler"
+description = "BSPSuite compiler executable"
+
+version.workspace = true
+authors.workspace = true
+documentation.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "bspc"
+
+[dependencies]
+bspsuite-core = { path = "../bspsuite-core" }

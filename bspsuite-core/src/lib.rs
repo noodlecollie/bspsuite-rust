@@ -5,16 +5,23 @@
 // if FFI-like code has spilled out into places it shouldn't be.
 #![deny(unsafe_code)]
 
+use clap::Parser;
+
 mod cinterface;
+mod cli;
 
 pub fn run_from_shell_arguments(args: &Vec<String>) -> i32
 {
-	println!("Entry point called with {} arguments", args.len());
+	let parsed_args: cli::Cli = cli::Cli::parse_from(args.iter());
 
-	for (index, arg) in args.iter().enumerate()
+	match &parsed_args.command
 	{
-		println!("Arg {index}: {arg}");
+		cli::Subcommand::Compile { output_file } =>
+		{
+			// TODO
+			let output_path: &str = output_file.to_str().unwrap();
+			println!("Compile command run with output file: {output_path}");
+			return cli::ErrorCode::exit_code(&cli::ErrorCode::InternalError);
+		}
 	}
-
-	return 0;
 }
