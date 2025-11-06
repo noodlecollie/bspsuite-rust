@@ -9,21 +9,41 @@ use clap::Parser;
 
 mod cinterface;
 mod cli;
-mod io;
 mod model;
+
+fn run_compile_command(args: &cli::CompileCommandArgs) -> Result<(), cli::CommandError>
+{
+	let output_path: &str = args.output_file.to_str().ok_or(cli::CommandError::new(
+		cli::ErrorCode::CommandLineError,
+		"Error parsing output file path",
+	))?;
+
+	// TODO: Implement this properly.
+	println!("Compile command run with output file: {output_path}");
+	return Ok(());
+}
 
 pub fn run_from_shell_arguments(args: &Vec<String>) -> i32
 {
 	let parsed_args: cli::Cli = cli::Cli::parse_from(args.iter());
 
-	match &parsed_args.command
+	let subcommand: &cli::Subcommand = &parsed_args.command;
+	let result: Result<(), cli::CommandError> = match subcommand
 	{
-		cli::Subcommand::Compile { output_file } =>
+		cli::Subcommand::Compile(args) => run_compile_command(&args),
+	};
+
+	let exit_code: i32 = match result
+	{
+		Ok(()) => 0,
+		Err(err) =>
 		{
-			// TODO
-			let output_path: &str = output_file.to_str().unwrap();
-			println!("Compile command run with output file: {output_path}");
-			return cli::ErrorCode::exit_code(&cli::ErrorCode::InternalError);
+			let error_string: &str = &err.description;
+			eprintln!("{subcommand} command failed: {error_string}");
+
+			err.exit_code()
 		}
-	}
+	};
+
+	return exit_code;
 }

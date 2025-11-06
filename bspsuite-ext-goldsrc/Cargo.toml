@@ -1,0 +1,16 @@
+[package]
+name = "bspsuite-ext-goldsrc"
+description = "Routines used for compiling maps for games based on the GoldSrc engine."
+
+version.workspace = true
+authors.workspace = true
+documentation.workspace = true
+edition.workspace = true
+
+[lib]
+name = "goldsrcext"
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+bspsuite-core = { path = "../bspsuite-core" }
+logos = "0.15.1"

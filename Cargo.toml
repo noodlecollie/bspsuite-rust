@@ -3,7 +3,7 @@ resolver = "3"
 
 # Right now, we just have bspcore, which defines the core library and compiler executable.
 # Extensions should be added later, as other packages that depend on bspcore.
-members = ["bspsuite-core", "bspsuite-compiler"]
+members = ["bspsuite-core", "bspsuite-compiler", "bspsuite-ext-goldsrc"]
 
 [workspace.package]
 version = "0.1.0"

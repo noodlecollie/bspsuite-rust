@@ -21,9 +21,9 @@ pub enum ErrorCode
 
 impl ErrorCode
 {
-	pub fn exit_code(error_code: &ErrorCode) -> i32
+	pub fn exit_code(&self) -> i32
 	{
-		return *error_code as i32;
+		return *self as i32;
 	}
 }
 
@@ -36,14 +36,39 @@ pub struct Cli
 	pub command: Subcommand,
 }
 
-#[derive(clap::Subcommand)]
+#[derive(clap::Subcommand, strum::Display)]
 pub enum Subcommand
 {
 	/// Compile a map from a source file.
-	Compile
+	Compile(CompileCommandArgs),
+}
+
+#[derive(clap::Args)]
+pub struct CompileCommandArgs
+{
+	/// Path to output file. If this exists, it will be overwritten.
+	#[arg(short, long)]
+	pub output_file: PathBuf,
+}
+
+pub struct CommandError
+{
+	pub code: ErrorCode,
+	pub description: String,
+}
+
+impl CommandError
+{
+	pub fn new(code: ErrorCode, description: &str) -> Self
 	{
-		/// Path to output file. If this exists, it will be overwritten.
-		#[arg(short, long)]
-		output_file: PathBuf,
-	},
+		return Self {
+			code: code,
+			description: String::from(description),
+		};
+	}
+
+	pub fn exit_code(&self) -> i32
+	{
+		return self.code.exit_code();
+	}
 }
