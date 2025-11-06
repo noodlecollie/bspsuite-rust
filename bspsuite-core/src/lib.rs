@@ -10,6 +10,7 @@ use clap::Parser;
 mod cinterface;
 mod cli;
 mod io;
+mod model;
 
 pub fn run_from_shell_arguments(args: &Vec<String>) -> i32
 {
