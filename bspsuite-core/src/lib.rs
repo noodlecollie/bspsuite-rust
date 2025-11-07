@@ -9,7 +9,8 @@ use clap::Parser;
 
 mod cinterface;
 mod cli;
-mod model;
+mod extinterface;
+pub mod model;
 
 fn run_compile_command(args: &cli::CompileCommandArgs) -> Result<(), cli::CommandError>
 {
