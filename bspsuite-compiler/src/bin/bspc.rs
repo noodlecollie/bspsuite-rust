@@ -1,6 +1,12 @@
-use bspcore;
+use std::env;
 
 fn main()
 {
-	bspcore::run_from_shell_arguments(&std::env::args().collect());
+	let args: Vec<String> = env::args().collect();
+
+	// TODO: Call into bspcore
+	for arg in args
+	{
+		println!("{arg}");
+	}
 }
