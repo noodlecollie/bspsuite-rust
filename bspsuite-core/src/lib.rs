@@ -1,3 +1,4 @@
+mod extensions;
 pub mod model;
 
 #[unsafe(no_mangle)]

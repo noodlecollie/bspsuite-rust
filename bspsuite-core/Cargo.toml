@@ -13,4 +13,5 @@ crate-type = ["rlib", "dylib"]
 
 [dependencies]
 glam = "0.30.9"
+libloading = "0.9.0"
 strum = { version = "0.27.2", features = ["derive", "strum_macros"] }

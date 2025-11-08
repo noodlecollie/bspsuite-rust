@@ -36,5 +36,22 @@ fn myfunc(opt: Option<&str>) -> Result<(), MyError>
 	// Unwrap was successful, so we can now do something with value.
 	// ...
 }
+```
 
+## How do I unwrap a `Result` if it's valid, and return an error if it's not?
+
+Similarly to above, use `or_else()`, followed by `?`.
+
+```rust
+// This function returns nothing on success,
+// but an error string if something goes wrong.
+fn myfunc(res: Result<&str, MyError>) -> Result<(), String>
+{
+	// Try and unwrap the string value.
+	let value: &str =
+		res.or_else(|err| Err(format!("An error occurred. {}", err.to_string())))?;
+
+	// Unwrap was successful, so we can now do something with value.
+	// ...
+}
 ```
