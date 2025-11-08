@@ -72,13 +72,14 @@ name = "bspsuite-compiler"
 version = "0.1.0"
 dependencies = [
  "bspsuite-core",
+ "clap",
+ "strum",
 ]
 
 [[package]]
 name = "bspsuite-core"
 version = "0.1.0"
 dependencies = [
- "clap",
  "glam",
  "strum",
 ]

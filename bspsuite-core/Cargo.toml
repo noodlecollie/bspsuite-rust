@@ -9,9 +9,8 @@ edition.workspace = true
 
 [lib]
 name = "bspcore"
-crate-type = ["cdylib"]
+crate-type = ["rlib", "dylib"]
 
 [dependencies]
-clap = { version = "4.5.51", features = ["derive"] }
 glam = "0.30.9"
 strum = { version = "0.27.2", features = ["derive", "strum_macros"] }
