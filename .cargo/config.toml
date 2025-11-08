@@ -1,0 +1,3 @@
+# For running polyfill tasks. See https://github.com/matklad/cargo-xtask
+[alias]
+bsp = "run --package bspsuite-buildtasks --"

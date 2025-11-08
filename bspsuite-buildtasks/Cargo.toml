@@ -1,17 +1,12 @@
 [package]
-name = "bspsuite-core"
-description = "Core algorithms for the BSPSuite compiler"
-
+name = "bspsuite-buildtasks"
+description = "Custom task runner for build tasks"
 version.workspace = true
 authors.workspace = true
 documentation.workspace = true
 edition.workspace = true
 
-[lib]
-name = "bspcore"
-crate-type = ["cdylib"]
-
 [dependencies]
 clap = { version = "4.5.51", features = ["derive"] }
-glam = "0.30.9"
+glob = "0.3.3"
 strum = { version = "0.27.2", features = ["derive", "strum_macros"] }
