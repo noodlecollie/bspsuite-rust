@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
 #[cfg(target_os = "linux")]
-use libloading::os::linux::Symbol as UnsafeSymbol;
+use libloading::os::unix::Symbol as UnsafeSymbol;
 #[cfg(target_os = "windows")]
 use libloading::os::windows::Symbol as UnsafeSymbol;
 use libloading::{Library, Symbol, library_filename};
