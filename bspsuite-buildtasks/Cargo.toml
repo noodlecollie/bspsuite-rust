@@ -7,6 +7,8 @@ documentation.workspace = true
 edition.workspace = true
 
 [dependencies]
+anyhow = "1.0.100"
 clap = { version = "4.5.51", features = ["derive"] }
 glob = "0.3.3"
 strum = { version = "0.27.2", features = ["derive", "strum_macros"] }
+target-lexicon = "0.13.3"
