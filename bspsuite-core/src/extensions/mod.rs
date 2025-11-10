@@ -1,46 +1,121 @@
-use std::path::Path;
+use std::fs;
+use std::fs::ReadDir;
+use std::path::{Path, PathBuf};
 
-use libloading::{Error, Library, Symbol, library_filename};
+use anyhow::{Context, Result, bail};
+use libloading::{Library, Symbol, library_filename};
+use target_lexicon::{HOST, OperatingSystem};
 
 const BSPSUITE_EXT_INTERFACE_CURRENT_VERSION: usize = 1;
 const BSPSUITE_EXT_SYM_GETINTERFACEVERSION: &[u8] = b"bspsuite_ext_get_interface_version";
-type ExtFnGetInterfaceVersion = fn() -> usize;
+type ExtFnGetInterfaceVersion = unsafe extern "C" fn() -> usize;
 
-pub fn load_extension_library(path: &Path) -> Result<libloading::Library, String>
+const BSPSUITE_EXT_SYM_PRESENT_SERVICES: &[u8] = b"bspsuite_ext_present_services";
+type ExtFnPresentServices = unsafe extern "C" fn(&ExtensionServicesApi) -> ExtensionServicesResult;
+
+pub struct Extension
 {
-	let load_result: Result<Library, Error> =
-		unsafe { Library::new(library_filename(path.as_os_str())) };
+	library: Library,
+}
 
-	let library: Library = load_result.or_else(|err| {
-		Err(format!(
-			"Could not load extension {}. {}",
-			path.to_str().unwrap(),
-			err.to_string()
-		))
+impl Extension
+{
+	pub fn new(library: Library) -> Extension
+	{
+		return Extension { library: library };
+	}
+}
+
+#[repr(C)]
+pub enum ExtensionServicesResult
+{
+	Ok,
+	Missed,
+}
+
+#[repr(C)]
+pub struct ExtensionServicesApi {}
+
+impl ExtensionServicesApi
+{
+	pub fn temp(&self) -> i32
+	{
+		return 1234;
+	}
+}
+
+pub fn find_extensions(root: &Path) -> Result<Vec<PathBuf>>
+{
+	let entries: ReadDir = fs::read_dir(root).with_context(|| {
+		format!(
+			"Could not read extensions from directory {}",
+			root.to_str().unwrap()
+		)
 	})?;
 
-	let lookup_result: Result<Symbol<ExtFnGetInterfaceVersion>, Error> =
-		unsafe { library.get(BSPSUITE_EXT_SYM_GETINTERFACEVERSION) };
+	let file_ext: &str = library_extension_for_platform();
+	let mut out_paths: Vec<PathBuf> = Vec::new();
 
-	let get_interface_version: Symbol<ExtFnGetInterfaceVersion> = lookup_result.or_else(|err| {
-		Err(format!(
-			"Could not load extension {}. {}",
-			path.to_str().unwrap(),
-			err.to_string()
-		))
-	})?;
+	for entry in entries
+	{
+		if let Ok(entry) = entry
+		{
+			let path: PathBuf = entry.path();
 
-	let interface_version: usize = get_interface_version();
+			if let Some(ext) = path.extension()
+				&& ext == file_ext
+			{
+				out_paths.push(path.clone());
+			}
+		}
+	}
+
+	return Ok(out_paths);
+}
+
+pub fn load_extension<'lib>(path: &PathBuf) -> Result<Extension>
+{
+	let library: Library = unsafe { Library::new(library_filename(path.as_os_str())) }?;
+	// let present_services: Symbol<'lib, ExtFnPresentServices> =
+	// 	get_interface_to_extension(&library)?;
+
+	return Ok(Extension::new(library));
+}
+
+pub fn load_extensions(paths: &Vec<PathBuf>) -> Vec<Result<Extension>>
+{
+	return paths.iter().map(|path| load_extension(path)).collect();
+}
+
+const fn library_extension_for_platform() -> &'static str
+{
+	return match HOST.operating_system
+	{
+		OperatingSystem::Windows => ".dll",
+		OperatingSystem::Linux => ".so",
+		_ => panic!("Unsupported operating system"),
+	};
+}
+
+fn get_interface_to_extension<'lib>(
+	library: &'lib Library,
+) -> Result<Symbol<'lib, ExtFnPresentServices>>
+{
+	let get_interface_version: Symbol<'lib, ExtFnGetInterfaceVersion> =
+		unsafe { library.get(BSPSUITE_EXT_SYM_GETINTERFACEVERSION) }?;
+
+	let interface_version: usize = unsafe { get_interface_version() };
 
 	if interface_version != BSPSUITE_EXT_INTERFACE_CURRENT_VERSION
 	{
-		return Err(format!(
-			"Could not load extension {}. Required interface version \
-			{BSPSUITE_EXT_INTERFACE_CURRENT_VERSION}, but extension provided \
-			interface version {interface_version}.",
-			path.to_str().unwrap()
-		));
+		bail!(
+			"Required interface version {BSPSUITE_EXT_INTERFACE_CURRENT_VERSION}, \
+			but extension provided interface version {interface_version}."
+		);
 	}
 
-	return Ok(library);
+	let present_services: Symbol<'lib, ExtFnPresentServices> =
+		unsafe { library.get(BSPSUITE_EXT_SYM_PRESENT_SERVICES) }?;
+
+	return Ok(present_services);
 }

@@ -12,6 +12,8 @@ name = "bspcore"
 crate-type = ["rlib", "dylib"]
 
 [dependencies]
+anyhow = "1.0.100"
 glam = "0.30.9"
 libloading = "0.9.0"
 strum = { version = "0.27.2", features = ["derive", "strum_macros"] }
+target-lexicon = "0.13.3"
