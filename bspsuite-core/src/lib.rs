@@ -4,6 +4,10 @@ mod extensions;
 mod libstate;
 pub mod model;
 
+pub use extensions::{
+	BSPSUITE_EXT_INTERFACE_CURRENT_VERSION, ExtensionServicesApi, ExtensionServicesResult,
+};
+
 #[repr(C)]
 pub struct InitArgs
 {

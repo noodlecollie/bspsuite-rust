@@ -10,7 +10,8 @@ use libloading::os::windows::Symbol as UnsafeSymbol;
 use libloading::{Library, Symbol, library_filename};
 use target_lexicon::{HOST, OperatingSystem};
 
-const BSPSUITE_EXT_INTERFACE_CURRENT_VERSION: usize = 1;
+pub const BSPSUITE_EXT_INTERFACE_CURRENT_VERSION: usize = 1;
+
 const BSPSUITE_EXT_SYM_GETINTERFACEVERSION: &[u8] = b"bspsuite_ext_get_interface_version";
 type ExtFnGetInterfaceVersion = extern "C" fn() -> usize;
 
