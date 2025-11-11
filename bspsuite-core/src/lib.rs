@@ -1,7 +1,8 @@
 use std::path::PathBuf;
 
-use simplelog;
+use simplelog::{debug, error, info};
 
+mod error_strings;
 mod extensions;
 mod libstate;
 pub mod model;
@@ -20,7 +21,9 @@ pub struct InitArgs
 	/// is being used as part of another application, it may not be
 	/// adequate. In this case, the application should supply the
 	/// relevant path here.
-	toolchain_root: Option<PathBuf>,
+	pub toolchain_root: Option<PathBuf>,
+
+	pub verbose: bool,
 }
 
 #[repr(C)]
@@ -38,8 +41,16 @@ pub extern "C" fn bspcore_init(args: &InitArgs) -> bool
 {
 	return match libstate::initialise(&args.toolchain_root)
 	{
-		Ok(()) => true,
-		Err(_) => false,
+		Ok(()) =>
+		{
+			debug!("BSPCore library initialised successfully");
+			true
+		}
+		Err(err) =>
+		{
+			error!("Failed to initialise BSPCore library. {err}");
+			false
+		}
 	};
 }
 
@@ -61,5 +72,5 @@ pub extern "C" fn bspcore_deinit() -> bool
 pub extern "C" fn bspcore_run_compile_command()
 {
 	// TODO
-	simplelog::info!("<b>run_compile_command()</b> called");
+	info!("<b>run_compile_command()</b> called");
 }

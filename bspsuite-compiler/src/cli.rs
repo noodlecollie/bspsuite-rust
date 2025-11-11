@@ -2,8 +2,9 @@ use std::path::PathBuf;
 
 /// Enum representing a numeric error code that may be returned from the
 /// compiler executable. A value of 0 (not present here) would indicate success.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, strum::Display)]
 pub enum ErrorCode
+// TODO: Move to core lib
 {
 	/// Some unexpected error occurred during execution. This should never
 	/// usually happen.
@@ -19,10 +20,26 @@ pub enum ErrorCode
 	IoError = 4,
 }
 
+#[derive(Copy, Clone, Debug, strum::Display, clap::ValueEnum)]
+pub enum DebugLevel
+{
+	/// No debug logging will occur.
+	Off,
+
+	/// Normal debug logs will be printed.
+	On,
+
+	/// Debug and trace logs will be printed.
+	Trace,
+}
+
 #[derive(clap::Parser)]
 #[command(version, about, long_about = None)]
 pub struct Cli
 {
+	#[arg(short, long)]
+	pub debug: Option<DebugLevel>,
+
 	#[command(subcommand)]
 	pub command: Subcommand,
 }

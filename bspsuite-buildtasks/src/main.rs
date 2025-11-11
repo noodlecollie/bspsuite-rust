@@ -1,10 +1,8 @@
 // Let's try and keep this build as clean as possible.
 #![deny(unused_variables)]
 use std::env;
-use std::path::Path;
-use std::path::PathBuf;
-use std::process::Command;
-use std::process::ExitStatus;
+use std::path::{Path, PathBuf};
+use std::process::{Command, ExitStatus};
 
 use anyhow::Context;
 use clap::Parser;

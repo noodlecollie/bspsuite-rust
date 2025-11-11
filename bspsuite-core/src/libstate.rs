@@ -1,10 +1,13 @@
 use std::path::PathBuf;
 use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
+use super::error_strings;
 use anyhow::{Context, Result, bail};
+use simplelog::{debug, warn};
 
-use super::extensions;
-use super::extensions::Extension;
+use crate::extensions::{
+	BSPSUITE_EXT_INTERFACE_CURRENT_VERSION, Extension, find_extensions, load_extensions,
+};
 
 pub struct LibState
 {
@@ -17,27 +20,50 @@ pub struct LibState
 
 	// Has to be a string so that we can const-initialise.
 	toolchain_root: String,
+
+	verbose: bool,
+}
+
+impl Default for LibState
+{
+	fn default() -> LibState
+	{
+		return LibState::const_default();
+	}
 }
 
 impl LibState
 {
-	pub const fn null() -> LibState
+	const fn const_default() -> LibState
 	{
 		return LibState {
 			valid: false,
 			toolchain_root: String::new(),
 			extensions: Vec::new(),
+			verbose: false,
 		};
 	}
 
 	pub fn new(toolchain_root: String) -> Result<LibState>
 	{
-		let extension_paths: Vec<PathBuf> =
-			LibState::find_extension_libraries(&PathBuf::from(&toolchain_root))?;
+		let extensions_dir: PathBuf = PathBuf::from(&toolchain_root).join("extensions");
+		let extension_paths: Vec<PathBuf> = find_extensions(&extensions_dir)?;
 
-		let extensions: Vec<Result<Extension>> = extensions::load_extensions(&extension_paths);
+		debug!(
+			"Found {} extensions in {}",
+			extension_paths.len(),
+			extensions_dir.to_str().unwrap()
+		);
 
-		// TODO: Log extensions that caused errors?
+		let extensions: Vec<Result<Extension>> =
+			load_extensions(&extension_paths, BSPSUITE_EXT_INTERFACE_CURRENT_VERSION);
+
+		for extension in extensions.iter().filter(|ext| ext.is_err())
+		{
+			let err = extension.as_ref().err().unwrap();
+			warn!("{}", error_strings::log_string(err));
+		}
+
 		let extensions: Vec<Extension> =
 			extensions.into_iter().filter_map(|ext| ext.ok()).collect();
 
@@ -45,12 +71,8 @@ impl LibState
 			valid: true,
 			toolchain_root: toolchain_root,
 			extensions: extensions,
+			..Default::default()
 		});
-	}
-
-	pub fn toolchain_root_path(&self) -> PathBuf
-	{
-		return PathBuf::from(&self.toolchain_root);
 	}
 
 	pub fn is_valid(&self) -> bool
@@ -58,16 +80,13 @@ impl LibState
 		return self.valid;
 	}
 
-	fn find_extension_libraries(toolchain_root: &PathBuf) -> Result<Vec<PathBuf>>
+	pub fn verbose(&self) -> bool
 	{
-		let mut root: PathBuf = PathBuf::from(toolchain_root);
-		root.push("extensions");
-
-		return extensions::find_extensions(&root);
+		return self.verbose;
 	}
 }
 
-static LIBSTATE: RwLock<LibState> = RwLock::new(LibState::null());
+static LIBSTATE: RwLock<LibState> = RwLock::new(LibState::const_default());
 
 pub fn initialise(toolchain_root: &Option<PathBuf>) -> Result<()>
 {
@@ -105,7 +124,7 @@ pub fn destroy() -> Result<()>
 
 	let mut state: RwLockWriteGuard<'_, LibState> = lock.unwrap();
 
-	*state = LibState::null();
+	*state = LibState::const_default();
 	Ok(())
 }
 

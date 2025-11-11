@@ -7,7 +7,7 @@ mod io;
 #[unsafe(no_mangle)]
 extern "C" fn bspsuite_ext_get_interface_version() -> usize
 {
-	return BSPSUITE_EXT_INTERFACE_CURRENT_VERSION;
+	return 2; //BSPSUITE_EXT_INTERFACE_CURRENT_VERSION;
 }
 
 #[unsafe(no_mangle)]
