@@ -15,5 +15,6 @@ crate-type = ["rlib", "dylib"]
 anyhow = "1.0.100"
 glam = "0.30.9"
 libloading = "0.9.0"
+simplelog = { version = "0.12.2", features = ["paris"] }
 strum = { version = "0.27.2", features = ["derive", "strum_macros"] }
 target-lexicon = "0.13.3"

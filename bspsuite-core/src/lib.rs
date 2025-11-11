@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use simplelog;
+
 mod extensions;
 mod libstate;
 pub mod model;
@@ -59,5 +61,5 @@ pub extern "C" fn bspcore_deinit() -> bool
 pub extern "C" fn bspcore_run_compile_command()
 {
 	// TODO
-	println!("run_compile_command() called")
+	simplelog::info!("<b>run_compile_command()</b> called");
 }

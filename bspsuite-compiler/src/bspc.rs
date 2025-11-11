@@ -5,6 +5,7 @@ mod cli;
 
 use bspcore;
 use clap::Parser;
+use simplelog::{ColorChoice, Config, LevelFilter, TermLogger, TerminalMode};
 
 /// Enum representing a numeric error code that may be returned from the
 /// compiler executable. A value of 0 (not present here) would indicate success.
@@ -46,6 +47,14 @@ impl Error for CommandError
 
 fn main()
 {
+	TermLogger::init(
+		LevelFilter::Info,
+		Config::default(),
+		TerminalMode::Mixed,
+		ColorChoice::Auto,
+	)
+	.expect("Could not initialise logger");
+
 	let parsed_args: cli::Cli = cli::Cli::parse();
 
 	let subcommand: &cli::Subcommand = &parsed_args.command;
@@ -63,12 +72,6 @@ fn main()
 
 fn run_compile_command(args: &cli::CompileCommandArgs) -> Result<(), CommandError>
 {
-	// TODO
-	println!(
-		"run_compile_command for {}",
-		args.output_file.to_str().unwrap()
-	);
-
 	bspcore::bspcore_run_compile_command();
 
 	return Ok(());
