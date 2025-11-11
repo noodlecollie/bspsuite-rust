@@ -1,25 +1,5 @@
 use std::path::PathBuf;
 
-/// Enum representing a numeric error code that may be returned from the
-/// compiler executable. A value of 0 (not present here) would indicate success.
-#[derive(Copy, Clone, Debug, strum::Display)]
-pub enum ErrorCode
-// TODO: Move to core lib
-{
-	/// Some unexpected error occurred during execution. This should never
-	/// usually happen.
-	InternalError = 1,
-
-	/// The provided command line options were not valid.
-	CommandLineError = 2,
-
-	/// There was an error configuring the compiler.
-	ConfigError = 3,
-
-	/// There was an error reading from or writing to disk.
-	IoError = 4,
-}
-
 #[derive(Copy, Clone, Debug, strum::Display, clap::ValueEnum)]
 pub enum DebugLevel
 {

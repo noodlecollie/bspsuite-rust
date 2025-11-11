@@ -1,8 +1,6 @@
 [workspace]
 resolver = "3"
 
-# Right now, we just have bspcore, which defines the core library and compiler executable.
-# Extensions should be added later, as other packages that depend on bspcore.
 members = ["bspsuite-core", "bspsuite-compiler", "bspsuite-ext-goldsrc", "bspsuite-buildtasks"]
 
 [workspace.package]
