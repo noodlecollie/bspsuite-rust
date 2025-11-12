@@ -49,17 +49,9 @@ fn main()
 
 fn run_build_command() -> Result<(), DynError>
 {
-	let cargo: String = env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
-
-	let status: ExitStatus = Command::new(cargo)
-		.current_dir(project_root())
-		.args(&["build"])
-		.status()?;
-
-	if !status.success()
-	{
-		Err("cargo build failed")?;
-	}
+	// Compiler also builds core library.
+	build_crate("bspsuite-compiler")?;
+	build_crate("bspsuite-ext-goldsrc")?;
 
 	let src_dir: PathBuf = binaries_dir();
 	let dist_dir: PathBuf = src_dir.join("dist");
@@ -81,6 +73,17 @@ fn run_build_command() -> Result<(), DynError>
 	copy_glob(&src_dir, &dist_dir.join("extensions"), glob_str.as_str())?;
 
 	Ok(())
+}
+
+fn build_crate(dir_name: &str) -> Result<ExitStatus, std::io::Error>
+{
+	return run_cargo(&["build"], &project_root().join(dir_name));
+}
+
+fn run_cargo(args: &[&str], cwd: &PathBuf) -> Result<ExitStatus, std::io::Error>
+{
+	let cargo: String = env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
+	return Command::new(cargo).current_dir(cwd).args(args).status();
 }
 
 fn create_dist_dir(dist_dir: &PathBuf) -> Result<(), DynError>
