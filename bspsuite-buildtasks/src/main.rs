@@ -1,10 +1,12 @@
 // Let's try and keep this build as clean as possible.
 #![deny(unused_variables)]
+#![deny(dead_code)]
+
 use std::env;
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitStatus};
 
-use anyhow::Context;
+use anyhow::{Context, Error, bail};
 use clap::Parser;
 use glob;
 use glob::Paths;
@@ -12,8 +14,6 @@ use target_lexicon::{HOST, OperatingSystem};
 
 // A lot of code in this file is based off
 // https://github.com/matklad/cargo-xtask/blob/master/examples/hello-world/xtask/src/main.rs
-
-type DynError = Box<dyn std::error::Error>;
 
 /// Commands that may be executed on the compiler executable.
 #[derive(clap::Parser)]
@@ -36,22 +36,26 @@ fn main()
 {
 	let parsed_args: Cli = Cli::parse();
 	let subcommand: &Subcommand = &parsed_args.command;
-	let result: Result<(), DynError> = match subcommand
+	let result: Result<(), Error> = match subcommand
 	{
 		Subcommand::Build => run_build_command(),
 	};
 
 	if let Err(e) = result
 	{
-		eprintln!("{}", e);
+		for item in e.chain()
+		{
+			eprintln!("{item}");
+		}
 	};
 }
 
-fn run_build_command() -> Result<(), DynError>
+fn run_build_command() -> Result<(), Error>
 {
 	// Compiler also builds core library.
 	build_crate("bspsuite-compiler")?;
-	build_crate("bspsuite-ext-goldsrc")?;
+
+	build_extensions()?;
 
 	let src_dir: PathBuf = binaries_dir();
 	let dist_dir: PathBuf = src_dir.join("dist");
@@ -75,9 +79,35 @@ fn run_build_command() -> Result<(), DynError>
 	Ok(())
 }
 
-fn build_crate(dir_name: &str) -> Result<ExitStatus, std::io::Error>
+fn build_extensions() -> Result<(), Error>
 {
-	return run_cargo(&["build"], &project_root().join(dir_name));
+	let glob_str: String = format!("{}/bspsuite-ext-*", project_root().to_str().unwrap());
+	let glob_result: Paths = glob::glob(glob_str.as_str()).unwrap();
+
+	for path in glob_result
+	{
+		if let Ok(path) = path
+		{
+			if path.is_dir()
+			{
+				build_crate(path.to_str().unwrap())?;
+			}
+		}
+	}
+
+	Ok(())
+}
+
+fn build_crate(dir_name: &str) -> Result<(), Error>
+{
+	let result = run_cargo(&["build"], &project_root().join(dir_name))?;
+
+	if !result.success()
+	{
+		bail!("Failed to build {dir_name}");
+	}
+
+	Ok(())
 }
 
 fn run_cargo(args: &[&str], cwd: &PathBuf) -> Result<ExitStatus, std::io::Error>
@@ -86,7 +116,7 @@ fn run_cargo(args: &[&str], cwd: &PathBuf) -> Result<ExitStatus, std::io::Error>
 	return Command::new(cargo).current_dir(cwd).args(args).status();
 }
 
-fn create_dist_dir(dist_dir: &PathBuf) -> Result<(), DynError>
+fn create_dist_dir(dist_dir: &PathBuf) -> Result<(), Error>
 {
 	create_dir(&dist_dir)?;
 	create_dir(&dist_dir.join("games"))?;
@@ -95,14 +125,14 @@ fn create_dist_dir(dist_dir: &PathBuf) -> Result<(), DynError>
 	Ok(())
 }
 
-fn create_dir(dir: &PathBuf) -> Result<(), DynError>
+fn create_dir(dir: &PathBuf) -> Result<(), Error>
 {
 	if dir.is_file()
 	{
-		Err(format!(
+		bail!(
 			"Failed to create directory: {} is actually a file",
 			dir.to_str().unwrap()
-		))?;
+		);
 	}
 
 	if !dir.is_dir()
@@ -114,7 +144,7 @@ fn create_dir(dir: &PathBuf) -> Result<(), DynError>
 	Ok(())
 }
 
-fn copy_glob(src: &PathBuf, dest: &PathBuf, glob_str: &str) -> Result<(), DynError>
+fn copy_glob(src: &PathBuf, dest: &PathBuf, glob_str: &str) -> Result<(), Error>
 {
 	let full_glob_str: String = format!("{}/{glob_str}", src.to_str().unwrap());
 	let glob_result: Paths = glob::glob(full_glob_str.as_str()).unwrap();
@@ -131,7 +161,7 @@ fn copy_glob(src: &PathBuf, dest: &PathBuf, glob_str: &str) -> Result<(), DynErr
 	Ok(())
 }
 
-fn copy_file(src: &PathBuf, dest: &PathBuf, name: &str) -> Result<(), DynError>
+fn copy_file(src: &PathBuf, dest: &PathBuf, name: &str) -> Result<(), Error>
 {
 	let source_path: PathBuf = src.join(name);
 	let dest_path: PathBuf = dest.join(name);
@@ -141,14 +171,46 @@ fn copy_file(src: &PathBuf, dest: &PathBuf, name: &str) -> Result<(), DynError>
 		return Ok(());
 	}
 
-	println!(
-		"Copying: {} -> {}",
-		source_path.to_str().unwrap(),
-		dest_path.to_str().unwrap()
-	);
+	let should_copy = {
+		if !dest_path.is_file()
+		{
+			true
+		}
+		else
+		{
+			let source_metadata = source_path.metadata().with_context(|| {
+				format!(
+					"Failed to get file metadata for {}",
+					source_path.to_str().unwrap()
+				)
+			})?;
 
-	std::fs::copy(&source_path, &dest_path)
-		.with_context(|| format!("Failed to copy {}", source_path.to_str().unwrap()))?;
+			let dest_metadata = dest_path.metadata().with_context(|| {
+				format!(
+					"Failed to get file metadata for {}",
+					dest_path.to_str().unwrap()
+				)
+			})?;
+
+			source_metadata.modified()? > dest_metadata.modified()?
+		}
+	};
+
+	if should_copy
+	{
+		println!(
+			"🔄️ {} -> {}",
+			source_path.to_str().unwrap(),
+			dest_path.to_str().unwrap()
+		);
+
+		std::fs::copy(&source_path, &dest_path)
+			.with_context(|| format!("Failed to copy {}", source_path.to_str().unwrap()))?;
+	}
+	else
+	{
+		println!("✅ {}", dest_path.to_str().unwrap())
+	}
 
 	Ok(())
 }

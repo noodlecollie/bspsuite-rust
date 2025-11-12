@@ -1,7 +1,12 @@
 [workspace]
 resolver = "3"
 
-members = ["bspsuite-core", "bspsuite-compiler", "bspsuite-ext-goldsrc", "bspsuite-buildtasks"]
+members = [
+	"bspsuite-buildtasks",
+	"bspsuite-core",
+	"bspsuite-compiler",
+	"bspsuite-ext-goldsrc"
+]
 
 [workspace.package]
 version = "0.1.0"
