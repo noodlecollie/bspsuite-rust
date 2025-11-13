@@ -5,7 +5,6 @@ mod loader;
 use loader::{UnsafeSymbol, get_unsafe_symbol};
 
 pub use loader::{find_extensions, load_extensions};
-use simplelog::info;
 
 /// Extension interface version that we expect extensions to present.
 /// If a call to bspsuite_ext_get_interface_version returns a version
@@ -69,6 +68,11 @@ impl Extension
 	{
 		return (*self.present_services_symbol)(&mut ExtensionServicesApi::new(self));
 	}
+
+	pub fn get_name(&self) -> &str
+	{
+		return &self.name;
+	}
 }
 
 impl<'ext> ExtensionServicesApi<'ext>
@@ -80,9 +84,8 @@ impl<'ext> ExtensionServicesApi<'ext>
 		};
 	}
 
-	pub fn removeme_test_call(&mut self)
+	pub fn request_map_parser_service(version: usize)
 	{
-		info!("removeme_test_call() was called");
-		self.extension.removeme_called_func = true;
+		// TODO
 	}
 }

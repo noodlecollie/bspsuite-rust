@@ -3,8 +3,8 @@ use std::fs::ReadDir;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
-use libloading::{Library, Symbol, library_filename};
-use simplelog::trace;
+use libloading::{Library, Symbol};
+use simplelog::{debug, trace};
 use target_lexicon::{HOST, OperatingSystem};
 
 use super::{BSPSUITE_EXT_SYM_GETINTERFACEVERSION, ExtFnGetInterfaceVersion, Extension};
@@ -88,8 +88,25 @@ fn load_extension<'lib>(path: &PathBuf, interface_version: usize) -> Result<Exte
 		);
 	}
 
-	let name: String = String::from(path.file_stem().unwrap().to_str().unwrap());
-	return Extension::from(name, library);
+	let name: String = compute_library_name(path.file_stem().unwrap().to_str().unwrap());
+	let result: Result<Extension> = Extension::from(name, library);
+
+	if let Ok(ext) = &result
+	{
+		debug!(
+			"Loaded extension: {} ({})",
+			ext.get_name(),
+			path.to_str().unwrap()
+		);
+	}
+
+	return result;
+}
+
+fn compute_library_name(filename_stem: &str) -> String
+{
+	let prefix: &str = library_prefix_for_platform();
+	return filename_stem[prefix.len()..].to_string();
 }
 
 const fn library_extension_for_platform() -> &'static str
@@ -98,6 +115,16 @@ const fn library_extension_for_platform() -> &'static str
 	{
 		OperatingSystem::Windows => "dll",
 		OperatingSystem::Linux => "so",
+		_ => panic!("Unsupported operating system"),
+	};
+}
+
+const fn library_prefix_for_platform() -> &'static str
+{
+	return match HOST.operating_system
+	{
+		OperatingSystem::Windows => "",
+		OperatingSystem::Linux => "lib",
 		_ => panic!("Unsupported operating system"),
 	};
 }
