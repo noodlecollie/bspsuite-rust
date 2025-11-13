@@ -1,4 +1,7 @@
+use const_cstr::{ConstCStr, const_cstr};
+use constcat::concat;
 use std::any::Any;
+use std::ffi::c_char;
 use std::panic::{UnwindSafe, catch_unwind};
 use std::path::PathBuf;
 
@@ -13,6 +16,9 @@ pub use extensions::{
 };
 
 use compiler_state::CompilerState;
+
+static BUILD_IDENTIFIER: ConstCStr =
+	const_cstr!(concat!(env!("BUILD_DATE"), " ", env!("VCS_HASH")));
 
 #[derive(Copy, Clone, Debug, strum::Display)]
 #[repr(C)]
@@ -63,6 +69,12 @@ pub struct CompileArgs
 {
 	pub base: BaseArgs,
 	pub input_file: PathBuf,
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn bspcore_get_build_identifier_string() -> *const c_char
+{
+	return BUILD_IDENTIFIER.as_ptr();
 }
 
 #[unsafe(no_mangle)]

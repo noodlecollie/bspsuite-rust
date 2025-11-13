@@ -19,3 +19,8 @@ simplelog = { version = "0.12.2", features = ["paris"] }
 strum = { version = "0.27.2", features = ["derive", "strum_macros"] }
 target-lexicon = "0.13.3"
 bspsuite-buildtasks = { path = "../bspsuite-buildtasks" }
+constcat = "0.6.1"
+const-cstr = "0.3.0"
+
+[build-dependencies]
+chrono = "0.4.42"

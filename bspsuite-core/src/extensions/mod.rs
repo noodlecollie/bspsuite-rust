@@ -84,8 +84,8 @@ impl<'ext> ExtensionServicesApi<'ext>
 		};
 	}
 
-	pub fn request_map_parser_service(version: usize)
+	pub fn removeme_test_call(&self) -> i32
 	{
-		// TODO
+		return 1234;
 	}
 }

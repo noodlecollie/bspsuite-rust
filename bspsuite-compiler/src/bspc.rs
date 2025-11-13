@@ -1,5 +1,7 @@
 mod cli;
 
+use std::ffi::{CStr, CString, c_char};
+
 use bspcore::{self, ResultCode};
 use clap::Parser;
 use simplelog::{ColorChoice, ConfigBuilder, LevelFilter, TermLogger, TerminalMode, error, info};
@@ -79,12 +81,16 @@ fn init_logger(parsed_args: &cli::Cli)
 
 fn print_banner()
 {
+	let build_id_ptr: *const c_char = bspcore::bspcore_get_build_identifier_string();
+	let build_id: &'static CStr = unsafe { CStr::from_ptr(build_id_ptr) };
+
 	info!(
 		"\n\
 		================================================================================\n\
-		<b>{}</b> version {}\n\
+		<b>{}</b> version {} ({})\n\
 		================================================================================",
 		env!("CARGO_BIN_NAME"),
-		env!("CARGO_PKG_VERSION")
+		env!("CARGO_PKG_VERSION"),
+		build_id.to_str().unwrap()
 	);
 }
