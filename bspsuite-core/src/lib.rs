@@ -48,17 +48,28 @@ pub struct BaseArgs
 	pub toolchain_root: Option<PathBuf>,
 }
 
+impl Default for BaseArgs
+{
+	fn default() -> Self
+	{
+		return Self {
+			toolchain_root: None,
+		};
+	}
+}
+
 #[repr(C)]
 pub struct CompileArgs
 {
-	base: BaseArgs,
+	pub base: BaseArgs,
+	pub input_file: PathBuf,
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn bspcore_run_compile_command(args: &BaseArgs) -> ResultCode
+pub extern "C" fn bspcore_run_compile_command(args: &CompileArgs) -> ResultCode
 {
 	return wrap_panics(|| {
-		let compiler_state: CompilerState = CompilerState::new(&args.toolchain_root);
+		let compiler_state: CompilerState = CompilerState::new(&args.base.toolchain_root);
 
 		return ResultCode::Ok;
 	});

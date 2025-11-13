@@ -33,13 +33,12 @@ fn main()
 
 fn run_compile_command(args: &cli::CompileCommandArgs) -> bspcore::ResultCode
 {
-	let base_args: bspcore::BaseArgs = bspcore::BaseArgs {
-		toolchain_root: None,
+	let args: bspcore::CompileArgs = bspcore::CompileArgs {
+		base: bspcore::BaseArgs::default(),
+		input_file: args.input_file.clone(),
 	};
 
-	// TODO: Compile args
-
-	return bspcore::bspcore_run_compile_command(&base_args);
+	return bspcore::bspcore_run_compile_command(&args);
 }
 
 // TODO: Swap to https://github.com/daboross/fern?

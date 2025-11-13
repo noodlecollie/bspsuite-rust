@@ -34,7 +34,7 @@ pub enum Subcommand
 #[derive(clap::Args)]
 pub struct CompileCommandArgs
 {
-	/// Path to output file. If this exists, it will be overwritten.
-	#[arg(short, long)]
-	pub output_file: PathBuf,
+	/// Path to map source file that will be compiled.
+	#[arg()]
+	pub input_file: PathBuf,
 }
