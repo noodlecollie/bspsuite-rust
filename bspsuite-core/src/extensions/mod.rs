@@ -5,6 +5,7 @@ mod loader;
 use loader::{UnsafeSymbol, get_unsafe_symbol};
 
 pub use loader::{find_extensions, load_extensions};
+use simplelog::info;
 
 /// Extension interface version that we expect extensions to present.
 /// If a call to bspsuite_ext_get_interface_version returns a version
@@ -15,33 +16,16 @@ const BSPSUITE_EXT_SYM_GETINTERFACEVERSION: &[u8] = b"bspsuite_ext_get_interface
 type ExtFnGetInterfaceVersion = extern "C" fn() -> usize;
 
 const BSPSUITE_EXT_SYM_PRESENT_SERVICES: &[u8] = b"bspsuite_ext_present_services";
-type ExtFnPresentServices = extern "C" fn(&ExtensionServicesApi) -> ExtensionServicesResult;
+type ExtFnPresentServices = extern "C" fn(&mut ExtensionServicesApi) -> ExtensionServicesResult;
 
 pub struct Extension
 {
+	name: String,
 	library: Library,
 	present_services_symbol: UnsafeSymbol<ExtFnPresentServices>,
-}
 
-impl Extension
-{
-	pub fn from(library: Library) -> Result<Extension>
-	{
-		// Unsafe symbol calls are allowed here, since all the symbols are stored
-		// privately on the struct, and the struct cannot live longer than the library.
-		let present_servives_symbol: UnsafeSymbol<ExtFnPresentServices> =
-			unsafe { get_unsafe_symbol(&library, BSPSUITE_EXT_SYM_PRESENT_SERVICES)? };
-
-		return Ok(Extension {
-			library: library,
-			present_services_symbol: present_servives_symbol,
-		});
-	}
-
-	pub fn present_services(&self, api: &ExtensionServicesApi) -> ExtensionServicesResult
-	{
-		return (*self.present_services_symbol)(api);
-	}
+	// Remove me once tested
+	pub removeme_called_func: bool,
 }
 
 #[repr(C)]
@@ -59,12 +43,46 @@ pub enum ExtensionServicesResult
 }
 
 #[repr(C)]
-pub struct ExtensionServicesApi {}
-
-impl ExtensionServicesApi
+pub struct ExtensionServicesApi<'ext>
 {
-	pub fn temp(&self) -> i32
+	extension: &'ext mut Extension,
+}
+
+impl Extension
+{
+	pub fn from(name: String, library: Library) -> Result<Extension>
 	{
-		return 1234;
+		// Unsafe symbol calls are allowed here, since all the symbols are stored
+		// privately on the struct, and the struct cannot live longer than the library.
+		let present_services_symbol: UnsafeSymbol<ExtFnPresentServices> =
+			unsafe { get_unsafe_symbol(&library, BSPSUITE_EXT_SYM_PRESENT_SERVICES)? };
+
+		return Ok(Extension {
+			name: name,
+			library: library,
+			present_services_symbol: present_services_symbol,
+			removeme_called_func: false,
+		});
+	}
+
+	pub fn present_services(&mut self) -> ExtensionServicesResult
+	{
+		return (*self.present_services_symbol)(&mut ExtensionServicesApi::new(self));
+	}
+}
+
+impl<'ext> ExtensionServicesApi<'ext>
+{
+	pub fn new(extension: &'ext mut Extension) -> Self
+	{
+		return Self {
+			extension: extension,
+		};
+	}
+
+	pub fn removeme_test_call(&mut self)
+	{
+		info!("removeme_test_call() was called");
+		self.extension.removeme_called_func = true;
 	}
 }

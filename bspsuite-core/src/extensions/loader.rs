@@ -88,7 +88,8 @@ fn load_extension<'lib>(path: &PathBuf, interface_version: usize) -> Result<Exte
 		);
 	}
 
-	return Extension::from(library);
+	let name: String = String::from(path.file_stem().unwrap().to_str().unwrap());
+	return Extension::from(name, library);
 }
 
 const fn library_extension_for_platform() -> &'static str

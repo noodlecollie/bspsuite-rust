@@ -2,7 +2,7 @@ mod cli;
 
 use bspcore::{self, ResultCode};
 use clap::Parser;
-use simplelog::{ColorChoice, Config, LevelFilter, TermLogger, TerminalMode, error};
+use simplelog::{ColorChoice, ConfigBuilder, LevelFilter, TermLogger, TerminalMode, error, info};
 
 use crate::cli::DebugLevel;
 
@@ -11,6 +11,7 @@ fn main()
 	let parsed_args: cli::Cli = cli::Cli::parse();
 
 	init_logger(&parsed_args);
+	print_banner();
 
 	let subcommand: &cli::Subcommand = &parsed_args.command;
 	let result_code: bspcore::ResultCode = match subcommand
@@ -41,6 +42,10 @@ fn run_compile_command(args: &cli::CompileCommandArgs) -> bspcore::ResultCode
 	return bspcore::bspcore_run_compile_command(&base_args);
 }
 
+// TODO: Swap to https://github.com/daboross/fern?
+// We'd like to customise the log output more than is
+// possible here. Hopefully we can also use Paris
+// (https://github.com/0x20f/paris)
 fn init_logger(parsed_args: &cli::Cli)
 {
 	let log_filter: LevelFilter = match parsed_args.debug
@@ -61,11 +66,26 @@ fn init_logger(parsed_args: &cli::Cli)
 		}
 	};
 
+	let mut builder: ConfigBuilder = ConfigBuilder::new();
+	builder.set_time_level(LevelFilter::Off);
+
 	TermLogger::init(
 		log_filter,
-		Config::default(),
+		builder.build(),
 		TerminalMode::Mixed,
 		ColorChoice::Auto,
 	)
 	.expect("Could not initialise logger");
+}
+
+fn print_banner()
+{
+	info!(
+		"\n\
+		================================================================================\n\
+		<b>{}</b> version {}\n\
+		================================================================================",
+		env!("CARGO_BIN_NAME"),
+		env!("CARGO_PKG_VERSION")
+	);
 }

@@ -1,5 +1,6 @@
 use anyhow::Result;
 use simplelog::{debug, warn};
+use std::env;
 use std::path::PathBuf;
 
 use super::extensions::{
@@ -16,10 +17,19 @@ pub struct CompilerState
 
 impl CompilerState
 {
-	pub fn new(toolchain_root: &PathBuf) -> Self
+	pub fn new(toolchain_root: &Option<PathBuf>) -> Self
 	{
+		let root_path: PathBuf = if toolchain_root.is_some()
+		{
+			toolchain_root.as_ref().unwrap().clone()
+		}
+		else
+		{
+			CompilerState::infer_toolchain_root()
+		};
+
 		let mut compiler_state: CompilerState = CompilerState {
-			toolchain_root: toolchain_root.clone(),
+			toolchain_root: root_path,
 			extensions: Vec::new(),
 		};
 
@@ -57,5 +67,13 @@ impl CompilerState
 		}
 
 		self.extensions = extensions.into_iter().filter_map(|ext| ext.ok()).collect();
+	}
+
+	fn infer_toolchain_root() -> PathBuf
+	{
+		let exe_path: PathBuf =
+			std::env::current_exe().expect("Could not get path to current executable");
+
+		return exe_path.parent().unwrap().to_path_buf();
 	}
 }

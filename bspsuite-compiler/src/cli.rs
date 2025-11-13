@@ -14,7 +14,7 @@ pub enum DebugLevel
 }
 
 #[derive(clap::Parser)]
-#[command(version, about, long_about = None)]
+#[command(version, about, long_about = None, display_name = env!("CARGO_BIN_NAME"))]
 pub struct Cli
 {
 	#[arg(short, long)]

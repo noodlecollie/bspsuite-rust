@@ -2,7 +2,7 @@ use std::any::Any;
 use std::panic::{UnwindSafe, catch_unwind};
 use std::path::PathBuf;
 
-use simplelog::{error, info};
+use simplelog::error;
 
 mod compiler_state;
 mod extensions;
@@ -11,6 +11,8 @@ pub mod model;
 pub use extensions::{
 	BSPSUITE_EXT_INTERFACE_CURRENT_VERSION, ExtensionServicesApi, ExtensionServicesResult,
 };
+
+use compiler_state::CompilerState;
 
 #[derive(Copy, Clone, Debug, strum::Display)]
 #[repr(C)]
@@ -46,19 +48,17 @@ pub struct BaseArgs
 	pub toolchain_root: Option<PathBuf>,
 }
 
+#[repr(C)]
+pub struct CompileArgs
+{
+	base: BaseArgs,
+}
+
 #[unsafe(no_mangle)]
 pub extern "C" fn bspcore_run_compile_command(args: &BaseArgs) -> ResultCode
 {
 	return wrap_panics(|| {
-		// TODO
-		info!(
-			"<b>run_compile_command()</b> called with toolchain root {}",
-			args.toolchain_root
-				.as_ref()
-				.map_or(String::from("<None>"), |path| String::from(
-					path.to_str().unwrap()
-				))
-		);
+		let compiler_state: CompilerState = CompilerState::new(&args.toolchain_root);
 
 		return ResultCode::Ok;
 	});
