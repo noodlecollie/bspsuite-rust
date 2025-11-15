@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
 use libloading::{Library, Symbol};
-use simplelog::{debug, trace};
+use log::{debug, trace};
 use target_lexicon::{HOST, OperatingSystem};
 
 use super::{BSPSUITE_EXT_SYM_GETINTERFACEVERSION, ExtFnGetInterfaceVersion, Extension};

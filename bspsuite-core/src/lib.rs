@@ -1,11 +1,12 @@
 use const_cstr::{ConstCStr, const_cstr};
 use constcat::concat;
+use paris::formatter::colorize_string;
 use std::any::Any;
 use std::ffi::c_char;
 use std::panic::{UnwindSafe, catch_unwind};
 use std::path::PathBuf;
 
-use simplelog::error;
+use log::error;
 
 mod compiler_state;
 mod extensions;
@@ -100,7 +101,8 @@ where
 		Ok(result_code) => result_code,
 		Err(err) =>
 		{
-			error!("<u><b><red>Fatal Error</red></b></u>\n{:?}", err);
+			let prefix: String = colorize_string("<u><b><red>Fatal Error</red></b></u>");
+			error!("{prefix}\n{:?}", err);
 			ResultCode::InternalError
 		}
 	};

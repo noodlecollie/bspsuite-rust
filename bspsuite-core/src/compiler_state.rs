@@ -1,6 +1,5 @@
 use anyhow::Result;
-use simplelog::{debug, warn};
-use std::env;
+use log::{debug, warn};
 use std::path::PathBuf;
 
 use super::extensions::{

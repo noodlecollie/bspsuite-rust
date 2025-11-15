@@ -15,12 +15,14 @@ crate-type = ["rlib", "dylib"]
 anyhow = "1.0.100"
 glam = "0.30.9"
 libloading = "0.9.0"
-simplelog = { version = "0.12.2", features = ["paris"] }
+log = "0.4.28"
 strum = { version = "0.27.2", features = ["derive", "strum_macros"] }
 target-lexicon = "0.13.3"
 bspsuite-buildtasks = { path = "../bspsuite-buildtasks" }
 constcat = "0.6.1"
 const-cstr = "0.3.0"
+fern = { version = "0.7.1", features = ["colored"] }
+paris = { version = "1.5.15", features = ["macros", "no_logger"] }
 
 [build-dependencies]
 chrono = "0.4.42"
