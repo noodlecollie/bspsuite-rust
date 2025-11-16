@@ -1,17 +1,10 @@
-use anyhow::Result;
-use log::{debug, warn};
+use super::extensions::ExtensionList;
 use std::path::PathBuf;
-
-use super::extensions::{
-	BSPSUITE_EXT_INTERFACE_CURRENT_VERSION, Extension, find_extensions, load_extensions,
-};
 
 pub struct CompilerState
 {
 	toolchain_root: PathBuf,
-
-	// List of loaded extension libraries.
-	extensions: Vec<Extension>,
+	extensions: ExtensionList,
 }
 
 impl CompilerState
@@ -27,45 +20,15 @@ impl CompilerState
 			CompilerState::infer_toolchain_root()
 		};
 
-		let mut compiler_state: CompilerState = CompilerState {
-			toolchain_root: root_path,
-			extensions: Vec::new(),
+		return CompilerState {
+			toolchain_root: root_path.clone(),
+			extensions: ExtensionList::new(&root_path),
 		};
-
-		compiler_state.load_extensions();
-		return compiler_state;
 	}
 
-	fn load_extensions(&mut self)
+	pub fn get_dummy_value() -> i32
 	{
-		let extensions_dir: PathBuf = self.toolchain_root.join("extensions");
-		let extensions_result: Result<Vec<PathBuf>> = find_extensions(&extensions_dir);
-
-		if let Err(err) = extensions_result
-		{
-			warn!("Failed to look up extensions on disk. {}", err);
-			return;
-		}
-
-		let extension_paths: Vec<PathBuf> = extensions_result.unwrap();
-
-		debug!(
-			"Found {} extensions in {}",
-			extension_paths.len(),
-			extensions_dir.to_str().unwrap()
-		);
-
-		let extensions: Vec<Result<Extension>> =
-			load_extensions(&extension_paths, BSPSUITE_EXT_INTERFACE_CURRENT_VERSION);
-
-		for extension in extensions.iter().filter(|ext| ext.is_err())
-		{
-			// TODO: Better error logging
-			let err = extension.as_ref().err().unwrap();
-			warn!("{err}");
-		}
-
-		self.extensions = extensions.into_iter().filter_map(|ext| ext.ok()).collect();
+		return 1234;
 	}
 
 	fn infer_toolchain_root() -> PathBuf

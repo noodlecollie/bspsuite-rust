@@ -55,8 +55,9 @@ pub fn load_extensions(paths: &Vec<PathBuf>, interface_version: usize) -> Vec<Re
 {
 	return paths
 		.iter()
-		.map(|path| {
-			load_extension(path, interface_version).map_err(|err| {
+		.enumerate()
+		.map(|(index, path)| {
+			load_extension(path, index, interface_version).map_err(|err| {
 				err.context(format!(
 					"Failed to load extension {}",
 					path.to_str().unwrap()
@@ -66,7 +67,8 @@ pub fn load_extensions(paths: &Vec<PathBuf>, interface_version: usize) -> Vec<Re
 		.collect();
 }
 
-fn load_extension<'lib>(path: &PathBuf, interface_version: usize) -> Result<Extension>
+fn load_extension<'lib>(path: &PathBuf, index: usize, interface_version: usize)
+-> Result<Extension>
 {
 	let library: Library = unsafe { Library::new(path.as_os_str()) }?;
 
@@ -89,7 +91,7 @@ fn load_extension<'lib>(path: &PathBuf, interface_version: usize) -> Result<Exte
 	}
 
 	let name: String = compute_library_name(path.file_stem().unwrap().to_str().unwrap());
-	let result: Result<Extension> = Extension::from(name, library);
+	let result: Result<Extension> = Extension::from(name, index, library);
 
 	if let Ok(ext) = &result
 	{

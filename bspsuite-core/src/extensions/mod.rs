@@ -1,10 +1,18 @@
 use anyhow::Result;
 use libloading::Library;
+use log::error;
 
 mod loader;
 use loader::{UnsafeSymbol, get_unsafe_symbol};
+mod dummy_api;
+mod extension_list;
+mod helpers;
 
+pub use dummy_api::{DummyApi, request_dummy_api};
+pub use extension_list::ExtensionList;
 pub use loader::{find_extensions, load_extensions};
+
+use crate::extensions::helpers::UnsupportedVersionError;
 
 /// Extension interface version that we expect extensions to present.
 /// If a call to bspsuite_ext_get_interface_version returns a version
@@ -20,6 +28,7 @@ type ExtFnPresentServices = extern "C" fn(&mut ExtensionServicesApi) -> Extensio
 pub struct Extension
 {
 	name: String,
+	id: usize,
 	library: Library,
 	present_services_symbol: UnsafeSymbol<ExtFnPresentServices>,
 
@@ -42,6 +51,13 @@ pub enum ExtensionServicesResult
 }
 
 #[repr(C)]
+pub enum ExtensionId
+{
+	Some(usize),
+	None,
+}
+
+#[repr(C)]
 pub struct ExtensionServicesApi<'ext>
 {
 	extension: &'ext mut Extension,
@@ -49,7 +65,7 @@ pub struct ExtensionServicesApi<'ext>
 
 impl Extension
 {
-	pub fn from(name: String, library: Library) -> Result<Extension>
+	pub fn from(name: String, id: usize, library: Library) -> Result<Extension>
 	{
 		// Unsafe symbol calls are allowed here, since all the symbols are stored
 		// privately on the struct, and the struct cannot live longer than the library.
@@ -58,6 +74,7 @@ impl Extension
 
 		return Ok(Extension {
 			name: name,
+			id: id,
 			library: library,
 			present_services_symbol: present_services_symbol,
 			removeme_called_func: false,
@@ -73,19 +90,61 @@ impl Extension
 	{
 		return &self.name;
 	}
+
+	pub fn get_id(&self) -> usize
+	{
+		return self.id;
+	}
 }
 
 impl<'ext> ExtensionServicesApi<'ext>
 {
-	pub fn new(extension: &'ext mut Extension) -> Self
+	pub extern "C" fn request_dummy_api(&self, version: usize) -> DummyApi
+	{
+		return self.request("DummyApi", request_dummy_api, version);
+	}
+
+	fn new(extension: &'ext mut Extension) -> Self
 	{
 		return Self {
 			extension: extension,
 		};
 	}
 
-	pub fn removeme_test_call(&self) -> i32
+	fn request<Api>(
+		&self,
+		api_name: &str,
+		requester: fn(usize, usize) -> Result<Api, UnsupportedVersionError>,
+		version: usize,
+	) -> Api
+	where
+		Api: Default,
 	{
-		return 1234;
+		let result: Result<Api, UnsupportedVersionError> =
+			requester(self.extension.get_id(), version);
+
+		if let Err(err) = result
+		{
+			error!(
+				"Extension {} failed to request API {api_name}. {err}",
+				self.extension.get_name()
+			);
+
+			return Api::default();
+		}
+
+		return result.unwrap();
+	}
+}
+
+impl ExtensionId
+{
+	pub fn is_valid(&self) -> bool
+	{
+		return match self
+		{
+			ExtensionId::Some(_) => true,
+			ExtensionId::None => false,
+		};
 	}
 }

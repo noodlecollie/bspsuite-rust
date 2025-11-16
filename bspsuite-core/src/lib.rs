@@ -13,7 +13,7 @@ mod extensions;
 pub mod model;
 
 pub use extensions::{
-	BSPSUITE_EXT_INTERFACE_CURRENT_VERSION, ExtensionServicesApi, ExtensionServicesResult,
+	BSPSUITE_EXT_INTERFACE_CURRENT_VERSION, DummyApi, ExtensionServicesApi, ExtensionServicesResult,
 };
 
 use compiler_state::CompilerState;

@@ -1,5 +1,5 @@
 use bspcore::{
-	BSPSUITE_EXT_INTERFACE_CURRENT_VERSION, ExtensionServicesApi, ExtensionServicesResult,
+	BSPSUITE_EXT_INTERFACE_CURRENT_VERSION, DummyApi, ExtensionServicesApi, ExtensionServicesResult,
 };
 
 mod io;
@@ -15,6 +15,14 @@ extern "C" fn bspsuite_ext_present_services(
 	api: &mut ExtensionServicesApi,
 ) -> ExtensionServicesResult
 {
-	api.removeme_test_call();
-	return ExtensionServicesResult::Ok;
+	let dummy_api: DummyApi = api.request_dummy_api(1);
+
+	return if dummy_api.is_valid()
+	{
+		ExtensionServicesResult::Ok
+	}
+	else
+	{
+		ExtensionServicesResult::Missed
+	};
 }
