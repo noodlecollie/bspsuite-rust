@@ -1,12 +1,13 @@
+use anyhow::Result;
 use const_cstr::{ConstCStr, const_cstr};
 use constcat::concat;
+use log::error;
 use paris::formatter::colorize_string;
 use std::any::Any;
 use std::ffi::c_char;
 use std::panic::{UnwindSafe, catch_unwind};
 use std::path::PathBuf;
-
-use log::error;
+use std::sync::Arc;
 
 mod compiler_state;
 mod extensions;
@@ -82,7 +83,16 @@ pub extern "C" fn bspcore_get_build_identifier_string() -> *const c_char
 pub extern "C" fn bspcore_run_compile_command(args: &CompileArgs) -> ResultCode
 {
 	return wrap_panics(|| {
-		let compiler_state: CompilerState = CompilerState::new(&args.base.toolchain_root);
+		let compiler_state: Result<Arc<CompilerState>> =
+			CompilerState::new_static(&args.base.toolchain_root);
+
+		if let Err(err) = compiler_state
+		{
+			error!("{err}");
+			return ResultCode::InternalError;
+		}
+
+		// TODO: Continue here
 
 		return ResultCode::Ok;
 	});
