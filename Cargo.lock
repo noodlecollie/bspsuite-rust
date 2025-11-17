@@ -86,6 +86,7 @@ dependencies = [
  "anyhow",
  "clap",
  "glob",
+ "paris",
  "strum",
  "target-lexicon",
 ]

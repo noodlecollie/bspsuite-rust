@@ -10,6 +10,7 @@ use anyhow::{Context, Error, bail};
 use clap::Parser;
 use glob;
 use glob::Paths;
+use paris::LogIcon;
 use target_lexicon::{HOST, OperatingSystem};
 
 // A lot of code in this file is based off
@@ -199,7 +200,8 @@ fn copy_file(src: &PathBuf, dest: &PathBuf, name: &str) -> Result<(), Error>
 	if should_copy
 	{
 		println!(
-			"🔄️ {} -> {}",
+			"{} {} -> {}",
+			LogIcon::Tick,
 			source_path.to_str().unwrap(),
 			dest_path.to_str().unwrap()
 		);
@@ -209,7 +211,7 @@ fn copy_file(src: &PathBuf, dest: &PathBuf, name: &str) -> Result<(), Error>
 	}
 	else
 	{
-		println!("✅ {}", dest_path.to_str().unwrap())
+		println!("• {}", dest_path.to_str().unwrap())
 	}
 
 	Ok(())

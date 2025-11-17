@@ -7,7 +7,7 @@ use libloading::{Library, Symbol};
 use log::{debug, trace};
 use target_lexicon::{HOST, OperatingSystem};
 
-use super::{BSPSUITE_EXT_SYM_GETINTERFACEVERSION, ExtFnGetInterfaceVersion, Extension};
+use super::{ExtFnGetInterfaceVersion, Extension, SYMBOL_GET_INTERFACE_VERSION};
 
 #[cfg(target_os = "linux")]
 pub use libloading::os::unix::Symbol as UnsafeSymbol;
@@ -73,7 +73,7 @@ fn load_extension<'lib>(path: &PathBuf, index: usize, interface_version: usize)
 	let library: Library = unsafe { Library::new(path.as_os_str()) }?;
 
 	let get_interface_version: Symbol<ExtFnGetInterfaceVersion> =
-		unsafe { library.get(BSPSUITE_EXT_SYM_GETINTERFACEVERSION) }?;
+		unsafe { library.get(SYMBOL_GET_INTERFACE_VERSION) }?;
 
 	let received_version: usize = get_interface_version();
 

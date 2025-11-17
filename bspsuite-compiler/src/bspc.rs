@@ -2,7 +2,7 @@ mod cli;
 
 use std::ffi::{CStr, c_char};
 
-use bspcore::{self, ResultCode};
+use bspcore::commands as Cmds;
 use clap::Parser;
 use lazy_static::lazy_static;
 use log::{Level, LevelFilter, error, info};
@@ -18,14 +18,14 @@ fn main()
 	print_banner();
 
 	let subcommand: &cli::Subcommand = &parsed_args.command;
-	let result_code: bspcore::ResultCode = match subcommand
+	let result_code: Cmds::ResultCode = match subcommand
 	{
 		cli::Subcommand::Compile(args) => run_compile_command(&args),
 	};
 
 	match result_code
 	{
-		ResultCode::Ok => (),
+		Cmds::ResultCode::Ok => (),
 		_ =>
 		{
 			error!("[{subcommand}] failed.");
@@ -35,14 +35,14 @@ fn main()
 	std::process::exit(result_code as i32);
 }
 
-fn run_compile_command(args: &cli::CompileCommandArgs) -> bspcore::ResultCode
+fn run_compile_command(args: &cli::CompileCommandArgs) -> Cmds::ResultCode
 {
-	let args: bspcore::CompileArgs = bspcore::CompileArgs {
-		base: bspcore::BaseArgs::default(),
+	let args: Cmds::CompileArgs = Cmds::CompileArgs {
+		base: Cmds::BaseArgs::default(),
 		input_file: args.input_file.clone(),
 	};
 
-	return bspcore::bspcore_run_compile_command(&args);
+	return Cmds::bspcore_run_compile_command(&args);
 }
 
 fn init_logger(parsed_args: &cli::Cli)
@@ -120,7 +120,7 @@ fn init_logger(parsed_args: &cli::Cli)
 
 fn print_banner()
 {
-	let build_id_ptr: *const c_char = bspcore::bspcore_get_build_identifier_string();
+	let build_id_ptr: *const c_char = Cmds::bspcore_get_build_identifier_string();
 	let build_id: &'static CStr = unsafe { CStr::from_ptr(build_id_ptr) };
 	let bin_name: String = colorize_string(format!("<b>{}</b>", env!("CARGO_BIN_NAME")));
 

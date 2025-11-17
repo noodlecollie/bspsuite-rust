@@ -17,12 +17,12 @@ use crate::extensions::helpers::UnsupportedVersionError;
 /// Extension interface version that we expect extensions to present.
 /// If a call to bspsuite_ext_get_interface_version returns a version
 /// that does not match this value, the extension will not be loaded.
-pub const BSPSUITE_EXT_INTERFACE_CURRENT_VERSION: usize = 1;
+pub const INTERFACE_VERSION: usize = 1;
 
-const BSPSUITE_EXT_SYM_GETINTERFACEVERSION: &[u8] = b"bspsuite_ext_get_interface_version";
+const SYMBOL_GET_INTERFACE_VERSION: &[u8] = b"bspsuite_ext_get_interface_version";
 type ExtFnGetInterfaceVersion = extern "C" fn() -> usize;
 
-const BSPSUITE_EXT_SYM_PRESENT_SERVICES: &[u8] = b"bspsuite_ext_present_services";
+const SYMBOL_PRESENT_SERVICES: &[u8] = b"bspsuite_ext_present_services";
 type ExtFnPresentServices = extern "C" fn(&mut ExtensionServicesApi) -> ExtensionServicesResult;
 
 pub struct Extension
@@ -70,7 +70,7 @@ impl Extension
 		// Unsafe symbol calls are allowed here, since all the symbols are stored
 		// privately on the struct, and the struct cannot live longer than the library.
 		let present_services_symbol: UnsafeSymbol<ExtFnPresentServices> =
-			unsafe { get_unsafe_symbol(&library, BSPSUITE_EXT_SYM_PRESENT_SERVICES)? };
+			unsafe { get_unsafe_symbol(&library, SYMBOL_PRESENT_SERVICES)? };
 
 		return Ok(Extension {
 			name: name,

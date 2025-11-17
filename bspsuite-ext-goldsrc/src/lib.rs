@@ -1,5 +1,5 @@
-use bspcore::{
-	BSPSUITE_EXT_INTERFACE_CURRENT_VERSION, DummyApi, ExtensionServicesApi, ExtensionServicesResult,
+use bspcore::extensions::{
+	DummyApi, ExtensionServicesApi, ExtensionServicesResult, INTERFACE_VERSION,
 };
 
 mod io;
@@ -7,7 +7,7 @@ mod io;
 #[unsafe(no_mangle)]
 extern "C" fn bspsuite_ext_get_interface_version() -> usize
 {
-	return BSPSUITE_EXT_INTERFACE_CURRENT_VERSION;
+	return INTERFACE_VERSION;
 }
 
 #[unsafe(no_mangle)]

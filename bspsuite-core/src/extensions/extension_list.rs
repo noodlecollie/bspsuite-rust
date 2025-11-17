@@ -2,8 +2,7 @@ use anyhow::Result;
 use std::path::PathBuf;
 
 use super::{
-	BSPSUITE_EXT_INTERFACE_CURRENT_VERSION, Extension, ExtensionServicesResult, find_extensions,
-	load_extensions,
+	Extension, ExtensionServicesResult, INTERFACE_VERSION, find_extensions, load_extensions,
 };
 use log::{debug, warn};
 
@@ -49,7 +48,7 @@ impl ExtensionList
 		);
 
 		let extensions: Vec<Result<Extension>> =
-			load_extensions(&extension_paths, BSPSUITE_EXT_INTERFACE_CURRENT_VERSION);
+			load_extensions(&extension_paths, INTERFACE_VERSION);
 
 		for extension in extensions.iter().filter(|ext| ext.is_err())
 		{
