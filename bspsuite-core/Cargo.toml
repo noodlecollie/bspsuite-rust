@@ -22,7 +22,7 @@ bspsuite-buildtasks = { path = "../bspsuite-buildtasks" }
 constcat = "0.6.1"
 const-cstr = "0.3.0"
 fern = { version = "0.7.1", features = ["colored"] }
-paris = { version = "1.5.15", features = ["macros", "no_logger"] }
+paris = { version = "1.5.15", features = ["no_logger"] }
 
 [build-dependencies]
 chrono = "0.4.42"

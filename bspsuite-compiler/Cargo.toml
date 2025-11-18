@@ -16,6 +16,6 @@ bspsuite-core = { path = "../bspsuite-core" }
 clap = { version = "4.5.51", features = ["derive"] }
 fern = { version = "0.7.1", features = ["colored"] }
 log = "0.4.28"
-paris = { version = "1.5.15", features = ["macros", "no_logger"] }
+paris = { version = "1.5.15", features = ["no_logger"] }
 strum = { version = "0.27.2", features = ["derive"] }
 lazy_static = "1.5.0"

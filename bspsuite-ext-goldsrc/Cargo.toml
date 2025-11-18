@@ -9,6 +9,8 @@ edition.workspace = true
 
 [lib]
 name = "goldsrcext"
+# This is a cdylib since it's 100% dynamically loaded,
+# so we can't guarantee a particular Rust ABI.
 crate-type = ["cdylib", "lib"]
 
 [dependencies]
