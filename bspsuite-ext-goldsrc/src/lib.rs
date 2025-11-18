@@ -1,11 +1,11 @@
-use bspcore::extensions::{DummyApi, DummyCallbacks, INTERFACE_VERSION, ProbeApi};
+use bspcore::extensions::{DummyApi, DummyCallbacks, EXTENSION_INTERFACE_VERSION, ProbeApi};
 
 mod io;
 
 #[unsafe(no_mangle)]
 extern "C" fn bspsuite_ext_get_interface_version() -> usize
 {
-	return INTERFACE_VERSION;
+	return EXTENSION_INTERFACE_VERSION;
 }
 
 #[unsafe(no_mangle)]

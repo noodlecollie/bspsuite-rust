@@ -16,7 +16,7 @@ pub use libloading::os::windows::Symbol as UnsafeSymbol;
 /// Extension interface version that we expect extensions to present.
 /// If a call to bspsuite_ext_get_interface_version returns a version
 /// that does not match this value, the extension will not be loaded.
-pub const INTERFACE_VERSION: usize = 1;
+pub const EXTENSION_INTERFACE_VERSION: usize = 1;
 
 const SYMBOL_GET_INTERFACE_VERSION: &[u8] = b"bspsuite_ext_get_interface_version";
 type ExtFnGetInterfaceVersion = extern "C" fn() -> usize;
@@ -87,10 +87,10 @@ fn load_extension<'lib>(path: &PathBuf) -> Result<Extension>
 		path.to_str().unwrap()
 	);
 
-	if received_version != INTERFACE_VERSION
+	if received_version != EXTENSION_INTERFACE_VERSION
 	{
 		bail!(
-			"Required interface version {INTERFACE_VERSION}, \
+			"Required interface version {EXTENSION_INTERFACE_VERSION}, \
 			but extension provided interface version {received_version}."
 		);
 	}

@@ -48,8 +48,10 @@ fn run_compile_command(args: &cli::CompileCommandArgs) -> Cmds::ResultCode
 fn init_logger(parsed_args: &cli::Cli)
 {
 	lazy_static! {
-		pub static ref WARNING_PREFIX: String = colorize_string("<b><yellow>Warning:</>");
-		pub static ref ERROR_PREFIX: String = colorize_string("<b><red>Error:</>");
+		pub static ref RESET: String = colorize_string("</>");
+		pub static ref TRACE_PREFIX: String = colorize_string("<d>");
+		pub static ref WARNING_PREFIX: String = colorize_string("<b><yellow></>");
+		pub static ref ERROR_PREFIX: String = colorize_string("<b><red></>");
 	}
 
 	let log_filter: LevelFilter = match parsed_args.debug
@@ -77,8 +79,16 @@ fn init_logger(parsed_args: &cli::Cli)
 		.format(|out, message, record| {
 			match record.level()
 			{
-				Level::Error => out.finish(format_args!("{} {}", ERROR_PREFIX.as_str(), message)),
-				Level::Warn => out.finish(format_args!("{} {}", WARNING_PREFIX.as_str(), message)),
+				Level::Error => out.finish(format_args!(
+					"{}Error: {message}{}",
+					ERROR_PREFIX.as_str(),
+					RESET.as_str()
+				)),
+				Level::Warn => out.finish(format_args!(
+					"{}Warning: {message}{}",
+					WARNING_PREFIX.as_str(),
+					RESET.as_str()
+				)),
 				_ => (),
 			};
 		})
@@ -99,11 +109,9 @@ fn init_logger(parsed_args: &cli::Cli)
 					let line: u32 = record.line().unwrap_or(0);
 
 					out.finish(format_args!(
-						"({} {}:{}) {}",
-						record.target(),
-						file,
-						line,
-						message
+						"{}({file}:{line}) {message}{}",
+						TRACE_PREFIX.as_str(),
+						RESET.as_str(),
 					))
 				}
 				_ => (),
@@ -125,7 +133,7 @@ fn print_banner()
 	let bin_name: String = colorize_string(format!("<b>{}</b>", env!("CARGO_BIN_NAME")));
 
 	info!(
-		"\n\
+		"\
 		================================================================================\n\
 		{bin_name} version {} ({})\n\
 		================================================================================",

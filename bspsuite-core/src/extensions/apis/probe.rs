@@ -1,5 +1,5 @@
 use super::dummy;
-use log::error;
+use log::{error, trace};
 
 /// Enum to indicate whether an API at a given version is supported.
 #[repr(C)]
@@ -13,10 +13,16 @@ pub enum ApiSupported
 }
 
 #[repr(C)]
+pub struct ProvidedCallbacks
+{
+	pub dummy_callbacks: Option<dummy::DummyCallbacks>,
+}
+
+#[repr(C)]
 pub struct ProbeApi
 {
 	extension_name: String,
-	dummy_callbacks: dummy::DummyCallbacks,
+	callbacks: ProvidedCallbacks,
 }
 
 impl ProbeApi
@@ -32,7 +38,7 @@ impl ProbeApi
 			return ApiSupported::No(actual_version);
 		}
 
-		self.dummy_callbacks = callbacks;
+		self.callbacks.dummy_callbacks = Some(callbacks);
 		return ApiSupported::Yes;
 	}
 
@@ -53,6 +59,26 @@ impl ProbeApi
 			return Err(actual_version);
 		}
 
+		trace!(
+			"Extension {} successfully requested version {requested_version} of {api}",
+			self.extension_name
+		);
+
 		return Ok(());
 	}
+}
+
+pub fn new(extension_name: String) -> ProbeApi
+{
+	return ProbeApi {
+		extension_name: extension_name,
+		callbacks: ProvidedCallbacks {
+			dummy_callbacks: None,
+		},
+	};
+}
+
+pub fn finish(api: ProbeApi) -> ProvidedCallbacks
+{
+	return api.callbacks;
 }

@@ -55,24 +55,17 @@ impl ExtensionList
 			warn!("{err}");
 		}
 
-		// TODO
-		// let mut extensions: Vec<Extension> =
-		// 	extensions.into_iter().filter_map(|ext| ext.ok()).collect();
+		let mut extensions: Vec<Extension> =
+			extensions.into_iter().filter_map(|ext| ext.ok()).collect();
 
-		// extensions.retain_mut(|ext| match ext.present_services()
-		// {
-		// 	ExtensionServicesResult::Ok => true,
-		// 	ExtensionServicesResult::Missed =>
-		// 	{
-		// 		warn!(
-		// 			"Extension {} was unable to fulfil all of its required APIs",
-		// 			ext.get_name(),
-		// 		);
+		// Retain only the extensions where probe succeeds.
+		extensions.retain_mut(|ext| {
+			ext.probe().map(|_| true).unwrap_or_else(|err| {
+				warn!("Probe failed for extension {}. {err}", ext.get_name());
+				false
+			})
+		});
 
-		// 		false
-		// 	}
-		// });
-
-		self.extensions = extensions.into_iter().filter_map(|ext| ext.ok()).collect();
+		self.extensions = extensions;
 	}
 }
