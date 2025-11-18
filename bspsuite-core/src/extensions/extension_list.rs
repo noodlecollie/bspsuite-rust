@@ -1,9 +1,8 @@
 use anyhow::Result;
 use std::path::PathBuf;
 
-use super::{
-	Extension, ExtensionServicesResult, INTERFACE_VERSION, find_extensions, load_extensions,
-};
+use super::extension::Extension;
+use super::loader::{find_extensions, load_extensions};
 use log::{debug, warn};
 
 pub struct ExtensionList
@@ -47,8 +46,7 @@ impl ExtensionList
 			extensions_dir.to_str().unwrap()
 		);
 
-		let extensions: Vec<Result<Extension>> =
-			load_extensions(&extension_paths, INTERFACE_VERSION);
+		let extensions: Vec<Result<Extension>> = load_extensions(&extension_paths);
 
 		for extension in extensions.iter().filter(|ext| ext.is_err())
 		{
@@ -57,23 +55,24 @@ impl ExtensionList
 			warn!("{err}");
 		}
 
-		let mut extensions: Vec<Extension> =
-			extensions.into_iter().filter_map(|ext| ext.ok()).collect();
+		// TODO
+		// let mut extensions: Vec<Extension> =
+		// 	extensions.into_iter().filter_map(|ext| ext.ok()).collect();
 
-		extensions.retain_mut(|ext| match ext.present_services()
-		{
-			ExtensionServicesResult::Ok => true,
-			ExtensionServicesResult::Missed =>
-			{
-				warn!(
-					"Extension {} was unable to fulfil all of its required APIs",
-					ext.get_name(),
-				);
+		// extensions.retain_mut(|ext| match ext.present_services()
+		// {
+		// 	ExtensionServicesResult::Ok => true,
+		// 	ExtensionServicesResult::Missed =>
+		// 	{
+		// 		warn!(
+		// 			"Extension {} was unable to fulfil all of its required APIs",
+		// 			ext.get_name(),
+		// 		);
 
-				false
-			}
-		});
+		// 		false
+		// 	}
+		// });
 
-		self.extensions = extensions;
+		self.extensions = extensions.into_iter().filter_map(|ext| ext.ok()).collect();
 	}
 }
