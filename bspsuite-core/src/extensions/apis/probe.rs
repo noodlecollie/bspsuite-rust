@@ -1,3 +1,6 @@
+use super::dummy;
+use log::error;
+
 /// Enum to indicate whether an API at a given version is supported.
 #[repr(C)]
 pub enum ApiSupported
@@ -9,13 +12,47 @@ pub enum ApiSupported
 	No(usize),
 }
 
-pub struct ProbeApi {}
+#[repr(C)]
+pub struct ProbeApi
+{
+	extension_name: String,
+	dummy_callbacks: dummy::DummyCallbacks,
+}
 
 impl ProbeApi
 {
-	pub fn request_dummy_api(&self, version: usize) -> ApiSupported
+	pub extern "C" fn request_dummy_api(
+		&mut self,
+		version: usize,
+		callbacks: dummy::DummyCallbacks,
+	) -> ApiSupported
 	{
-		// TODO
-		return ApiSupported::No(0);
+		if let Err(actual_version) = self.check_version("DummyApi", version, dummy::API_VERSION)
+		{
+			return ApiSupported::No(actual_version);
+		}
+
+		self.dummy_callbacks = callbacks;
+		return ApiSupported::Yes;
+	}
+
+	fn check_version(
+		&self,
+		api: &str,
+		requested_version: usize,
+		actual_version: usize,
+	) -> Result<(), usize>
+	{
+		if requested_version != actual_version
+		{
+			error!(
+				"Extension {} failed request for {api}. Requested version was {requested_version}, but the provided version is {actual_version}",
+				self.extension_name
+			);
+
+			return Err(actual_version);
+		}
+
+		return Ok(());
 	}
 }

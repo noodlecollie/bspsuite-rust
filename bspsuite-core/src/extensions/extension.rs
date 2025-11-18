@@ -4,7 +4,6 @@ use anyhow::Result;
 use libloading::Library;
 
 const SYMBOL_PROBE: &[u8] = b"bspsuite_ext_probe";
-
 type ExtFnProbe = extern "C" fn(&mut ProbeApi);
 
 pub struct Extension
