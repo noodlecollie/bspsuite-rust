@@ -19,13 +19,13 @@ pub struct ProvidedCallbacks
 }
 
 #[repr(C)]
-pub struct ProbeApi
+pub struct ProbeApi<'l>
 {
-	extension_name: String,
+	extension_name: &'l str,
 	callbacks: ProvidedCallbacks,
 }
 
-impl ProbeApi
+impl<'l> ProbeApi<'l>
 {
 	pub extern "C" fn request_dummy_api(
 		&mut self,
@@ -68,7 +68,7 @@ impl ProbeApi
 	}
 }
 
-pub fn new(extension_name: String) -> ProbeApi
+pub fn new(extension_name: &str) -> ProbeApi<'_>
 {
 	return ProbeApi {
 		extension_name: extension_name,

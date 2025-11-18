@@ -63,7 +63,7 @@ impl Extension
 
 	pub fn probe(&mut self) -> Result<()>
 	{
-		let mut api: ProbeApi = apis::probe::new(self.name.clone());
+		let mut api: ProbeApi = apis::probe::new(self.name.as_str());
 		(*self.probe_fn)(&mut api);
 
 		let callbacks: ProvidedCallbacks = apis::probe::finish(api);

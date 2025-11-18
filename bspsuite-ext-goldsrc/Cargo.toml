@@ -15,4 +15,5 @@ crate-type = ["cdylib", "lib"]
 
 [dependencies]
 bspsuite-core = { path = "../bspsuite-core" }
+log = "0.4.28"
 logos = "0.15.1"

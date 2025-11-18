@@ -60,6 +60,8 @@ impl ExtensionList
 
 		// Retain only the extensions where probe succeeds.
 		extensions.retain_mut(|ext| {
+			debug!("Probing extension {}", ext.get_name());
+
 			ext.probe().map(|_| true).unwrap_or_else(|err| {
 				warn!("Probe failed for extension {}. {err}", ext.get_name());
 				false

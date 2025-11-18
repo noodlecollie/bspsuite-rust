@@ -20,6 +20,11 @@ pub struct Cli
 	#[arg(short, long)]
 	pub debug: Option<DebugLevel>,
 
+	/// Root directory under which to look for BSPSuite configs and
+	/// extensions. If not specified, defaults to the application directory.
+	#[arg(long)]
+	pub toolchain_root: Option<PathBuf>,
+
 	#[command(subcommand)]
 	pub command: Subcommand,
 }
