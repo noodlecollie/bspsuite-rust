@@ -42,7 +42,7 @@ fn run_compile_command(args: &cli::CompileCommandArgs) -> Cmds::ResultCode
 		input_file: args.input_file.clone(),
 	};
 
-	return Cmds::bspcore_run_compile_command(&args);
+	return Cmds::bspcore_run_compile(&args);
 }
 
 fn init_logger(parsed_args: &cli::Cli)

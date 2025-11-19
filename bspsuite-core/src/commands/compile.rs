@@ -12,7 +12,7 @@ pub struct CompileArgs
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn bspcore_run_compile_command(args: &CompileArgs) -> ResultCode
+pub extern "C" fn bspcore_run_compile(args: &CompileArgs) -> ResultCode
 {
 	return wrap_panics(|| {
 		let compiler_state: CompilerState = CompilerState::new(&args.base.toolchain_root);

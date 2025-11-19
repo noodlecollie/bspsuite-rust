@@ -4,7 +4,7 @@ mod utils;
 
 use std::ffi::c_char;
 
-pub use compile::{CompileArgs, bspcore_run_compile_command};
+pub use compile::{CompileArgs, bspcore_run_compile};
 pub use types::{BaseArgs, ResultCode};
 
 use crate::BUILD_IDENTIFIER;
