@@ -1,0 +1,15 @@
+[package]
+name = "bspsuite-extinterface"
+description = "Shared types for BSPSuite compiler extensions"
+
+version.workspace = true
+authors.workspace = true
+documentation.workspace = true
+edition.workspace = true
+
+[lib]
+name = "bspextifc"
+crate-type = ["lib"]
+
+[dependencies]
+log = "0.4.28"

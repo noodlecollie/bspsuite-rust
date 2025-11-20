@@ -5,11 +5,12 @@ members = [
 	"bspsuite-buildtasks",
 	"bspsuite-core",
 	"bspsuite-compiler",
-	"bspsuite-ext-goldsrc"
+	"bspsuite-ext-goldsrc",
+	"bspsuite-extinterface"
 ]
 
 [workspace.package]
 version = "0.1.0"
-authors = ["NoodleCollie"]
+authors = ["NoodleCollie <noodle.collie@protonmail.com>"]
 documentation = "https://example.com/bar"
 edition = "2024"
