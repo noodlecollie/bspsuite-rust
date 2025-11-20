@@ -1,3 +1,5 @@
+pub mod apis;
+
 /// Extension interface version that we expect extensions to return.
 /// If a call to bspsuite_ext_get_interface_version returns a version
 /// that does not match this value, the extension will not be loaded.

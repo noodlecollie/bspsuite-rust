@@ -1,6 +1,14 @@
 use super::dummy;
 use log::{error, trace};
 
+/// Symbol name for the bspsuite_ext_probe function.
+pub const SYMBOL_PROBE: &[u8] = b"bspsuite_ext_probe";
+
+/// Function signature for the bspsuite_ext_probe function.
+/// Extensions should implement this function to register themselves for
+/// specific features.
+pub type ExtFnProbe = extern "C" fn(&mut ProbeApi);
+
 /// Enum to indicate whether an API at a given version is supported.
 #[repr(C)]
 pub enum ApiSupported
@@ -8,26 +16,32 @@ pub enum ApiSupported
 	/// The API is supported.
 	Yes,
 
-	// The API is not supported. The enum value contains the version number that is supported.
+	/// The API is not supported. The enclosed value contains the version number
+	/// that is supported.
 	No(usize),
-}
-
-#[repr(C)]
-pub struct ProvidedCallbacks
-{
-	pub dummy_callbacks: Option<dummy::DummyCallbacks>,
 }
 
 #[repr(C)]
 pub struct ProbeApi<'l>
 {
 	extension_name: &'l str,
-	callbacks: ProvidedCallbacks,
+	callbacks: &'l mut internal::ExtensionCallbacks,
 }
 
 impl<'l> ProbeApi<'l>
 {
-	pub extern "C" fn request_dummy_api(
+	pub fn new(
+		extension_name: &'l str,
+		callbacks: &'l mut internal::ExtensionCallbacks,
+	) -> ProbeApi<'l>
+	{
+		return ProbeApi {
+			extension_name: extension_name,
+			callbacks: callbacks,
+		};
+	}
+
+	pub fn request_dummy_api(
 		&mut self,
 		version: usize,
 		callbacks: dummy::DummyCallbacks,
@@ -68,17 +82,21 @@ impl<'l> ProbeApi<'l>
 	}
 }
 
-pub fn new(extension_name: &str) -> ProbeApi<'_>
+mod internal
 {
-	return ProbeApi {
-		extension_name: extension_name,
-		callbacks: ProvidedCallbacks {
-			dummy_callbacks: None,
-		},
-	};
-}
+	#[repr(C)]
+	pub struct ExtensionCallbacks
+	{
+		pub dummy_callbacks: Option<super::dummy::DummyCallbacks>,
+	}
 
-pub fn finish(api: ProbeApi) -> ProvidedCallbacks
-{
-	return api.callbacks;
+	impl Default for ExtensionCallbacks
+	{
+		fn default() -> Self
+		{
+			return Self {
+				dummy_callbacks: None,
+			};
+		}
+	}
 }
