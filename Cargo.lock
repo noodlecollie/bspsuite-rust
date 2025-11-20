@@ -126,7 +126,7 @@ dependencies = [
 name = "bspsuite-ext-goldsrc"
 version = "0.1.0"
 dependencies = [
- "bspsuite-core",
+ "bspsuite-extinterface",
  "log",
  "logos",
 ]

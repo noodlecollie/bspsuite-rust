@@ -1,4 +1,5 @@
-pub mod apis;
+pub mod dummy_api;
+pub mod probe_api;
 
 /// Extension interface version that we expect extensions to return.
 /// If a call to bspsuite_ext_get_interface_version returns a version

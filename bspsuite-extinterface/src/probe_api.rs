@@ -1,4 +1,4 @@
-use super::dummy;
+use super::dummy_api;
 use log::{error, trace};
 
 /// Symbol name for the bspsuite_ext_probe function.
@@ -44,10 +44,10 @@ impl<'l> ProbeApi<'l>
 	pub fn request_dummy_api(
 		&mut self,
 		version: usize,
-		callbacks: dummy::DummyCallbacks,
+		callbacks: dummy_api::DummyCallbacks,
 	) -> ApiSupported
 	{
-		if let Err(actual_version) = self.check_version("DummyApi", version, dummy::API_VERSION)
+		if let Err(actual_version) = self.check_version("DummyApi", version, dummy_api::API_VERSION)
 		{
 			return ApiSupported::No(actual_version);
 		}
@@ -87,7 +87,7 @@ mod internal
 	#[repr(C)]
 	pub struct ExtensionCallbacks
 	{
-		pub dummy_callbacks: Option<super::dummy::DummyCallbacks>,
+		pub dummy_callbacks: Option<super::dummy_api::DummyCallbacks>,
 	}
 
 	impl Default for ExtensionCallbacks
