@@ -4,6 +4,9 @@ use std::path::{Path, PathBuf};
 
 use super::extension::Extension;
 use anyhow::{Context, Result, bail};
+use bspextifc::{
+	EXTENSION_INTERFACE_VERSION, ExtFnGetInterfaceVersion, SYMBOL_GET_INTERFACE_VERSION,
+};
 use libloading::{Library, Symbol};
 use log::{debug, trace};
 use target_lexicon::{HOST, OperatingSystem};
@@ -12,14 +15,6 @@ use target_lexicon::{HOST, OperatingSystem};
 pub use libloading::os::unix::Symbol as UnsafeSymbol;
 #[cfg(target_os = "windows")]
 pub use libloading::os::windows::Symbol as UnsafeSymbol;
-
-/// Extension interface version that we expect extensions to present.
-/// If a call to bspsuite_ext_get_interface_version returns a version
-/// that does not match this value, the extension will not be loaded.
-pub const EXTENSION_INTERFACE_VERSION: usize = 1;
-
-const SYMBOL_GET_INTERFACE_VERSION: &[u8] = b"bspsuite_ext_get_interface_version";
-type ExtFnGetInterfaceVersion = extern "C" fn() -> usize;
 
 // It is the caller's responsibility that the symbol is not used after the
 // library is unloaded.

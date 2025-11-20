@@ -1,17 +1,11 @@
-use crate::extensions::apis;
-
 use super::loader::{UnsafeSymbol, get_unsafe_symbol};
 use anyhow::Result;
-use apis::dummy::DummyCallbacks;
-use apis::probe::{ProbeApi, ProvidedCallbacks};
+use bspextifc::{dummy_api, probe_api};
 use libloading::Library;
-
-const SYMBOL_PROBE: &[u8] = b"bspsuite_ext_probe";
-type ExtFnProbe = extern "C" fn(&mut ProbeApi);
 
 struct ApiCallbacks
 {
-	dummy_api_callbacks: Option<DummyCallbacks>,
+	dummy_api_callbacks: Option<dummy_api::DummyCallbacks>,
 }
 
 impl Default for ApiCallbacks
@@ -35,7 +29,7 @@ pub struct Extension
 	#[expect(dead_code)]
 	library: Library,
 
-	probe_fn: UnsafeSymbol<ExtFnProbe>,
+	probe_fn: UnsafeSymbol<probe_api::ExtFnProbe>,
 	api_callbacks: ApiCallbacks,
 }
 
@@ -45,8 +39,8 @@ impl Extension
 	{
 		// Unsafe symbol calls are allowed here, since all the symbols are stored
 		// privately on the struct, and the struct cannot live longer than the library.
-		let probe_fn: UnsafeSymbol<ExtFnProbe> =
-			unsafe { get_unsafe_symbol(&library, SYMBOL_PROBE)? };
+		let probe_fn: UnsafeSymbol<probe_api::ExtFnProbe> =
+			unsafe { get_unsafe_symbol(&library, probe_api::SYMBOL_PROBE)? };
 
 		return Ok(Extension {
 			name: name,
@@ -63,13 +57,16 @@ impl Extension
 
 	pub fn probe(&mut self) -> Result<()>
 	{
-		let mut api: ProbeApi = apis::probe::new(self.name.as_str());
+		let mut probe_callbacks: probe_api::internal::ExtensionCallbacks =
+			probe_api::internal::ExtensionCallbacks::default();
+
+		let mut api: probe_api::ProbeApi =
+			probe_api::ProbeApi::new(self.name.as_str(), &mut probe_callbacks);
+
 		(*self.probe_fn)(&mut api);
 
-		let callbacks: ProvidedCallbacks = apis::probe::finish(api);
-
 		self.api_callbacks = ApiCallbacks {
-			dummy_api_callbacks: callbacks.dummy_callbacks,
+			dummy_api_callbacks: probe_callbacks.dummy_callbacks,
 		};
 
 		return Ok(());

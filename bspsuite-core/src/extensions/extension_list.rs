@@ -22,11 +22,6 @@ impl ExtensionList
 		return out;
 	}
 
-	pub fn get_extensions(&self) -> &[Extension]
-	{
-		return &self.extensions;
-	}
-
 	fn load_extensions(&mut self, toolchain_root: &PathBuf)
 	{
 		let extensions_dir: PathBuf = toolchain_root.join("extensions");

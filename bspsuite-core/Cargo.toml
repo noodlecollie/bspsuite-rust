@@ -12,6 +12,7 @@ name = "bspcore"
 crate-type = ["rlib", "dylib"]
 
 [dependencies]
+bspsuite-extinterface = { path = "../bspsuite-extinterface" }
 anyhow = "1.0.100"
 glam = "0.30.9"
 libloading = "0.9.0"

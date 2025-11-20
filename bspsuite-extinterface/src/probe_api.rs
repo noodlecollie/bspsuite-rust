@@ -82,7 +82,7 @@ impl<'l> ProbeApi<'l>
 	}
 }
 
-mod internal
+pub mod internal
 {
 	#[repr(C)]
 	pub struct ExtensionCallbacks
