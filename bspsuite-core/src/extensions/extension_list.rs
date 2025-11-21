@@ -1,8 +1,8 @@
-use anyhow::Result;
+use anyhow::{Context, Result};
+use std::fs;
 use std::path::PathBuf;
 
 use super::extension::Extension;
-use super::loader::{find_extensions, load_extensions};
 use log::{debug, warn};
 
 pub struct ExtensionList
@@ -18,14 +18,15 @@ impl ExtensionList
 			extensions: Vec::new(),
 		};
 
-		out.load_extensions(toolchain_root);
+		out.load_extensions_from(toolchain_root);
 		return out;
 	}
 
-	fn load_extensions(&mut self, toolchain_root: &PathBuf)
+	fn load_extensions_from(&mut self, toolchain_root: &PathBuf)
 	{
 		let extensions_dir: PathBuf = toolchain_root.join("extensions");
-		let extensions_result: Result<Vec<PathBuf>> = find_extensions(&extensions_dir);
+		let extensions_result: Result<Vec<PathBuf>> =
+			ExtensionList::find_extensions(&extensions_dir);
 
 		if let Err(err) = extensions_result
 		{
@@ -41,7 +42,7 @@ impl ExtensionList
 			extensions_dir.to_str().unwrap()
 		);
 
-		let extensions: Vec<Result<Extension>> = load_extensions(&extension_paths);
+		let extensions: Vec<Result<Extension>> = ExtensionList::load_extensions(&extension_paths);
 
 		for extension in extensions.iter().filter(|ext| ext.is_err())
 		{
@@ -64,5 +65,49 @@ impl ExtensionList
 		});
 
 		self.extensions = extensions;
+	}
+
+	fn find_extensions(root: &PathBuf) -> Result<Vec<PathBuf>>
+	{
+		let entries: fs::ReadDir = fs::read_dir(root).with_context(|| {
+			format!(
+				"Could not read extensions from directory {}",
+				root.to_str().unwrap()
+			)
+		})?;
+
+		let file_ext: &str = Extension::library_extension_for_platform();
+		let mut out_paths: Vec<PathBuf> = Vec::new();
+
+		for entry in entries
+		{
+			if let Ok(entry) = entry
+			{
+				let path: PathBuf = entry.path();
+
+				if let Some(ext) = path.extension()
+					&& ext == file_ext
+				{
+					out_paths.push(path.clone());
+				}
+			}
+		}
+
+		return Ok(out_paths);
+	}
+
+	fn load_extensions(paths: &Vec<PathBuf>) -> Vec<Result<Extension>>
+	{
+		return paths
+			.iter()
+			.map(|path| {
+				Extension::from(path).map_err(|err| {
+					err.context(format!(
+						"Failed to load extension {}",
+						path.to_str().unwrap()
+					))
+				})
+			})
+			.collect();
 	}
 }

@@ -1,16 +1,11 @@
-use bspextifc::{EXTENSION_INTERFACE_VERSION, dummy_api, probe_api};
+use bspextifc::{dummy_api, implement_extension_info, probe_api};
 use log::info;
 
 mod io;
 
-#[unsafe(no_mangle)]
-extern "C" fn bspsuite_ext_get_interface_version() -> usize
-{
-	return EXTENSION_INTERFACE_VERSION;
-}
+implement_extension_info!(probe);
 
-#[unsafe(no_mangle)]
-extern "C" fn bspsuite_ext_probe(api: &mut probe_api::ProbeApi)
+extern "C" fn probe(api: &mut probe_api::ProbeApi)
 {
 	api.request_dummy_api(
 		dummy_api::API_VERSION,

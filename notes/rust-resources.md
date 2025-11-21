@@ -3,3 +3,4 @@
 [Packages, crates and modules](https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html)
 [Cargo conventions](https://doc.rust-lang.org/cargo/guide/project-layout.html)
 [Cargo environment variables](https://doc.rust-lang.org/cargo/reference/environment-variables.html)
+[Plugin system example](https://adventures.michaelfbryan.com/posts/plugins-in-rust)

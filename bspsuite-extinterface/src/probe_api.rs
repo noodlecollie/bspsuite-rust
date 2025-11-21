@@ -1,8 +1,7 @@
 use super::dummy_api;
 use log::{error, trace};
 
-/// Symbol name for the bspsuite_ext_probe function.
-pub const SYMBOL_PROBE: &[u8] = b"bspsuite_ext_probe";
+pub const API_VERSION: usize = 1;
 
 /// Function signature for the bspsuite_ext_probe function.
 /// Extensions should implement this function to register themselves for
