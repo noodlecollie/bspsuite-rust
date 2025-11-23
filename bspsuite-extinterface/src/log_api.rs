@@ -4,14 +4,14 @@ use log;
 pub const NAME: &str = "LogApi";
 pub const API_VERSION: usize = 1;
 
-pub type CanLogFn = extern "C" fn(&log::Level) -> bool;
+pub type GetLogLevelFilterFn = extern "C" fn() -> log::LevelFilter;
 pub type LogFn = extern "C" fn(&LogMessageArgs);
 
 #[repr(C)]
 #[derive(Clone)]
 pub struct LogApi
 {
-	pub can_log: CanLogFn,
+	pub get_log_level_filter_fn: GetLogLevelFilterFn,
 	pub log_fn: LogFn,
 }
 
@@ -33,9 +33,14 @@ pub struct ExtensionLogger
 
 impl ExtensionLogger
 {
-	pub fn new(log_api: LogApi) -> Box<Self>
+	pub fn assign_static_logger(log_api: LogApi) -> Result<(), log::SetLoggerError>
 	{
-		return Box::new(Self { log_api: log_api });
+		let filter: log::LevelFilter = (log_api.get_log_level_filter_fn)();
+
+		log::set_boxed_logger(Box::new(Self { log_api: log_api }))?;
+		log::set_max_level(filter);
+
+		return Ok(());
 	}
 }
 
@@ -43,7 +48,7 @@ impl log::Log for ExtensionLogger
 {
 	fn enabled(&self, metadata: &log::Metadata) -> bool
 	{
-		return (self.log_api.can_log)(&metadata.level());
+		return metadata.level() <= (self.log_api.get_log_level_filter_fn)();
 	}
 
 	fn log(&self, record: &log::Record)

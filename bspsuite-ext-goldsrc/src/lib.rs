@@ -1,6 +1,6 @@
 use bspextifc::log_api::{self, ExtensionLogger};
 use bspextifc::{dummy_api, implement_extension_info, probe_api};
-use log::info;
+use log::{info, trace};
 
 mod io;
 
@@ -15,10 +15,10 @@ extern "C" fn probe(api: &mut probe_api::ProbeApi)
 	{
 		// Not really much we can do here if we're unable to log.
 		// Perhaps we should return a failure code from the probe function?
-		if log::set_boxed_logger(ExtensionLogger::new(api)).is_ok()
+		if ExtensionLogger::assign_static_logger(api).is_ok()
 		{
-			// REMOVE ME
-			info!("Goldsrc extension set logger successfully");
+			// REMOVE ME once tested
+			trace!("Goldsrc extension set logger successfully");
 		}
 	}
 }
