@@ -1,101 +1,169 @@
-use super::dummy_api;
+use super::log_api;
+use super::string_ref::StringRef;
 use log::{error, trace};
+use std::result::Result;
 
 pub const API_VERSION: usize = 1;
-
-/// Function signature for the bspsuite_ext_probe function.
-/// Extensions should implement this function to register themselves for
-/// specific features.
 pub type ExtFnProbe = extern "C" fn(&mut ProbeApi);
 
-/// Enum to indicate whether an API at a given version is supported.
-#[repr(C)]
-pub enum ApiSupported
+/// Enum representing a failure to provide a requested API to the caller
+/// extension.
+pub enum RequestError
 {
-	/// The API is supported.
-	Yes,
+	/// The extension already successfully requested the API earlier.
+	AlreadyObtained,
 
-	/// The API is not supported. The enclosed value contains the version number
-	/// that is supported.
-	No(usize),
+	/// The provided version did not match the version of the available API.
+	/// The inner value of this enum item is the actual version available.
+	VersionDidNotMatch(usize),
 }
 
 #[repr(C)]
 pub struct ProbeApi<'l>
 {
-	extension_name: &'l str,
-	callbacks: &'l mut internal::ExtensionCallbacks,
+	extension_name: StringRef<'l>,
+	apis: internal::ExportedApis,
 }
 
 impl<'l> ProbeApi<'l>
 {
-	pub fn new(
-		extension_name: &'l str,
-		callbacks: &'l mut internal::ExtensionCallbacks,
-	) -> ProbeApi<'l>
+	pub fn new(extension_name: &'l str, apis: internal::ExportedApis) -> ProbeApi<'l>
 	{
 		return ProbeApi {
-			extension_name: extension_name,
-			callbacks: callbacks,
+			extension_name: StringRef::from(extension_name),
+			apis: apis,
 		};
 	}
 
-	pub fn request_dummy_api(
+	pub fn request_log_api(
 		&mut self,
-		version: usize,
-		callbacks: dummy_api::DummyCallbacks,
-	) -> ApiSupported
-	{
-		if let Err(actual_version) = self.check_version("DummyApi", version, dummy_api::API_VERSION)
-		{
-			return ApiSupported::No(actual_version);
-		}
-
-		self.callbacks.dummy_callbacks = Some(callbacks);
-		return ApiSupported::Yes;
-	}
-
-	fn check_version(
-		&self,
-		api: &str,
 		requested_version: usize,
-		actual_version: usize,
-	) -> Result<(), usize>
+	) -> Result<log_api::LogApi, RequestError>
 	{
-		if requested_version != actual_version
-		{
-			error!(
-				"Extension {} failed request for {api}. Requested version was {requested_version}, but the provided version is {actual_version}",
-				self.extension_name
-			);
-
-			return Err(actual_version);
-		}
-
-		trace!(
-			"Extension {} successfully requested version {requested_version} of {api}",
-			self.extension_name
+		return self.apis.log_api.request_version(
+			self.extension_name.to_string().as_str(),
+			requested_version,
+			(),
 		);
-
-		return Ok(());
 	}
 }
 
 pub mod internal
 {
+	use super::*;
+
 	#[repr(C)]
-	pub struct ExtensionCallbacks
+	pub enum ApiRequestResult
 	{
-		pub dummy_callbacks: Option<super::dummy_api::DummyCallbacks>,
+		None,
+		Taken,
+
+		// Version stored here is the version that was requested,
+		// so that we can look this up later if we want to know.
+		RequestedIncompatibleVersion(usize),
 	}
 
-	impl Default for ExtensionCallbacks
+	#[repr(C)]
+	pub struct ExportedApi<CoreApi, ExtCallbacks = ()>
+	where
+		CoreApi: Clone,
+		ExtCallbacks: Clone,
 	{
-		fn default() -> Self
+		pub name: StringRef<'static>,
+		pub version: usize,
+		pub core_api: CoreApi,
+		pub ext_callbacks: ExtCallbacks,
+		pub last_request_result: ApiRequestResult,
+	}
+
+	impl<CoreApi, ExtCallbacks> ExportedApi<CoreApi, ExtCallbacks>
+	where
+		CoreApi: Clone,
+		ExtCallbacks: Clone,
+	{
+		pub fn new(
+			name: &'static str,
+			version: usize,
+			core_api: CoreApi,
+			ext_callbacks: ExtCallbacks,
+		) -> Self
 		{
 			return Self {
-				dummy_callbacks: None,
+				name: StringRef::from(name),
+				version: version,
+				core_api: core_api,
+				ext_callbacks: ext_callbacks,
+				last_request_result: ApiRequestResult::None,
 			};
 		}
+
+		pub fn request_version(
+			&mut self,
+			extension_name: &str,
+			requested_version: usize,
+			ext_callbacks: ExtCallbacks,
+		) -> Result<CoreApi, RequestError>
+		{
+			let latest_request_result: ApiRequestResult = {
+				if let ApiRequestResult::Taken = self.last_request_result
+				{
+					error!(
+						"Extension {extension_name} requested {} when it had already been consumed by an earlier call",
+						self.name.to_string()
+					);
+
+					ApiRequestResult::Taken
+				}
+				else if requested_version != self.version
+				{
+					error!(
+						"Extension {extension_name} failed request for {}. Requested version was {requested_version}, but the provided version is {}",
+						self.name.to_string(),
+						self.version
+					);
+
+					ApiRequestResult::RequestedIncompatibleVersion(requested_version)
+				}
+				else
+				{
+					trace!(
+						"Extension {extension_name} successfully requested version {requested_version} of {}",
+						self.name.to_string(),
+					);
+
+					self.ext_callbacks = ext_callbacks;
+					ApiRequestResult::Taken
+				}
+			};
+
+			let out_result: Result<CoreApi, RequestError> = match latest_request_result
+			{
+				ApiRequestResult::Taken =>
+				{
+					if let ApiRequestResult::None = self.last_request_result
+					{
+						Ok(self.core_api.clone())
+					}
+					else
+					{
+						Err(RequestError::AlreadyObtained)
+					}
+				}
+				ApiRequestResult::RequestedIncompatibleVersion(_) =>
+				{
+					Err(RequestError::VersionDidNotMatch(self.version))
+				}
+				_ => unreachable!(),
+			};
+
+			self.last_request_result = latest_request_result;
+			return out_result;
+		}
+	}
+
+	#[repr(C)]
+	pub struct ExportedApis
+	{
+		pub log_api: ExportedApi<log_api::LogApi>,
 	}
 }

@@ -1,3 +1,4 @@
+use bspextifc::log_api::{self, ExtensionLogger};
 use bspextifc::{dummy_api, implement_extension_info, probe_api};
 use log::info;
 
@@ -7,12 +8,19 @@ implement_extension_info!(probe);
 
 extern "C" fn probe(api: &mut probe_api::ProbeApi)
 {
-	api.request_dummy_api(
-		dummy_api::API_VERSION,
-		dummy_api::DummyCallbacks {
-			entry_point: dummyapi_entry_point,
-		},
-	);
+	let log_api_result: Result<log_api::LogApi, probe_api::RequestError> =
+		api.request_log_api(log_api::API_VERSION);
+
+	if let Ok(api) = log_api_result
+	{
+		// Not really much we can do here if we're unable to log.
+		// Perhaps we should return a failure code from the probe function?
+		if log::set_boxed_logger(ExtensionLogger::new(api)).is_ok()
+		{
+			// REMOVE ME
+			info!("Goldsrc extension set logger successfully");
+		}
+	}
 }
 
 extern "C" fn dummyapi_entry_point(api: &mut dummy_api::DummyApi)

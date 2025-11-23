@@ -1,5 +1,7 @@
+use super::api_impl;
 use anyhow::{Result, bail};
-use bspextifc::{ExtensionInfo, SYMBOL_EXTENSION_INFO, dummy_api, probe_api};
+use bspextifc::probe_api::internal::{ExportedApi, ExportedApis};
+use bspextifc::{ExtensionInfo, SYMBOL_EXTENSION_INFO, dummy_api, log_api, probe_api};
 use libloading::{Library, Symbol};
 use log::{debug, trace};
 use std::path::PathBuf;
@@ -96,20 +98,25 @@ impl Extension
 
 	pub fn probe(&mut self) -> Result<()>
 	{
-		let mut probe_callbacks: probe_api::internal::ExtensionCallbacks =
-			probe_api::internal::ExtensionCallbacks::default();
+		let exported_apis: ExportedApis = Extension::create_exported_apis();
+		let mut probe = probe_api::ProbeApi::new(&self.name, exported_apis);
 
-		let mut api: probe_api::ProbeApi =
-			probe_api::ProbeApi::new(self.name.as_str(), &mut probe_callbacks);
+		(self.extension_info.probe_fn)(&mut probe);
 
-		let probe_fn: probe_api::ExtFnProbe = self.extension_info.probe_fn;
-		probe_fn(&mut api);
-
-		self.api_callbacks = ApiCallbacks {
-			dummy_api_callbacks: probe_callbacks.dummy_callbacks,
-		};
-
+		// TODO: Go through each API and see if any errors were encountered.
 		return Ok(());
+	}
+
+	fn create_exported_apis() -> ExportedApis
+	{
+		return ExportedApis {
+			log_api: ExportedApi::new(
+				log_api::NAME,
+				log_api::API_VERSION,
+				api_impl::log_api::create_api(),
+				(),
+			),
+		};
 	}
 
 	fn compute_library_name(filename_stem: &str) -> String

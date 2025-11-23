@@ -2,7 +2,9 @@
 // https://users.rust-lang.org/t/linking-issues-when-designing-a-dynamic-plugin-based-architecture/136388
 
 pub mod dummy_api;
+pub mod log_api;
 pub mod probe_api;
+mod string_ref;
 
 /// Struct whose sole responsibility is to expose a versioned entry point API to
 /// users of an extension.

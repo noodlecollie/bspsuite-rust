@@ -15,5 +15,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 bspsuite-extinterface = { path = "../bspsuite-extinterface" }
-log = "0.4.28"
+log = { version = "0.4.28", features = ["std"] }
 logos = "0.15.1"
