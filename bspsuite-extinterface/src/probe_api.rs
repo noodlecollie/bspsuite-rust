@@ -4,10 +4,11 @@ use log::{error, trace};
 use std::result::Result;
 
 pub const API_VERSION: usize = 1;
-pub type ExtFnProbe = extern "C" fn(&mut ProbeApi);
+pub type ExtFnProbe = extern "C" fn(&mut ProbeApi) -> ProbeResult;
 
 /// Enum representing a failure to provide a requested API to the caller
 /// extension.
+#[repr(C)]
 pub enum RequestError
 {
 	/// The extension already successfully requested the API earlier.
@@ -16,6 +17,20 @@ pub enum RequestError
 	/// The provided version did not match the version of the available API.
 	/// The inner value of this enum item is the actual version available.
 	VersionDidNotMatch(usize),
+}
+
+/// Enum representing the result of a probe call to an extension.
+#[repr(C)]
+pub enum ProbeResult
+{
+	/// The extension was able to obtain all the APIs that it needed. This
+	/// result still covers cases where an extension is not able to get every
+	/// single API that it asks for, but is still able to operate correctly.
+	Success,
+
+	/// The extension was not able to obtain all the APIs it needed to function
+	/// correctly.
+	Failure,
 }
 
 #[repr(C)]
