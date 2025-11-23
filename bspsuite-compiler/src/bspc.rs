@@ -50,8 +50,8 @@ fn init_logger(parsed_args: &cli::Cli)
 	lazy_static! {
 		pub static ref RESET: String = colorize_string("</>");
 		pub static ref TRACE_PREFIX: String = colorize_string("<d>");
-		pub static ref WARNING_PREFIX: String = colorize_string("<b><yellow></>");
-		pub static ref ERROR_PREFIX: String = colorize_string("<b><red></>");
+		pub static ref WARNING_PREFIX: String = colorize_string("<b><yellow>");
+		pub static ref ERROR_PREFIX: String = colorize_string("<b><red>");
 	}
 
 	let log_filter: LevelFilter = match parsed_args.debug
@@ -80,12 +80,12 @@ fn init_logger(parsed_args: &cli::Cli)
 			match record.level()
 			{
 				Level::Error => out.finish(format_args!(
-					"{}Error: {message}{}",
+					"{}Error:{} {message}",
 					ERROR_PREFIX.as_str(),
 					RESET.as_str()
 				)),
 				Level::Warn => out.finish(format_args!(
-					"{}Warning: {message}{}",
+					"{}Warning:{} {message}",
 					WARNING_PREFIX.as_str(),
 					RESET.as_str()
 				)),

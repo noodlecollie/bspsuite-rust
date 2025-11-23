@@ -1,9 +1,10 @@
 use super::api_impl;
-use anyhow::{Result, bail};
+use anyhow::{Context, Result, bail};
 use bspextifc::probe_api::internal::{ExportedApi, ExportedApis};
 use bspextifc::{ExtensionInfo, SYMBOL_EXTENSION_INFO, dummy_api, log_api, probe_api};
 use libloading::{Library, Symbol};
 use log::{debug, trace};
+use std::ffi::CStr;
 use std::path::PathBuf;
 use target_lexicon::{HOST, OperatingSystem};
 
@@ -41,21 +42,23 @@ pub struct Extension
 	// Unsafe symbols are OK here PROVIDED that they are not
 	// copied out of this struct. Here, the extension info
 	// will not live longer than the library member above.
-	extension_info: UnsafeSymbol<bspextifc::ExtensionInfo>,
+	extension_info: UnsafeSymbol<&'static bspextifc::ExtensionInfo>,
 
 	api_callbacks: ApiCallbacks,
 }
 
 impl Extension
 {
-	pub fn from(path: &PathBuf) -> Result<Self>
+	pub fn load(path: &PathBuf) -> Result<Self>
 	{
 		let library: Library = unsafe { Library::new(path.as_os_str()) }?;
 
-		let extension_info_symbol: UnsafeSymbol<ExtensionInfo> =
-			unsafe { Extension::get_unsafe_symbol(&library, SYMBOL_EXTENSION_INFO) }?;
+		let extension_info_symbol: UnsafeSymbol<&'static ExtensionInfo> =
+			unsafe { Extension::get_unsafe_symbol(&library, SYMBOL_EXTENSION_INFO) }.with_context(
+				|| format!("Failed to look up extension info symbol in extension library"),
+			)?;
 
-		let extension_info: &ExtensionInfo = &extension_info_symbol;
+		let extension_info: &ExtensionInfo = *extension_info_symbol;
 		let probe_api_version: usize = extension_info.probe_api_version;
 
 		trace!(

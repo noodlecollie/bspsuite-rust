@@ -48,7 +48,16 @@ impl ExtensionList
 		{
 			// TODO: Better error logging
 			let err = extension.as_ref().err().unwrap();
-			warn!("{err}");
+			let source = err.source();
+
+			if let Some(source) = source
+			{
+				warn!("{err} Source error: {source}");
+			}
+			else
+			{
+				warn!("{err}");
+			}
 		}
 
 		let mut extensions: Vec<Extension> =
@@ -101,7 +110,7 @@ impl ExtensionList
 		return paths
 			.iter()
 			.map(|path| {
-				Extension::from(path).map_err(|err| {
+				Extension::load(path).map_err(|err| {
 					err.context(format!(
 						"Failed to load extension {}",
 						path.to_str().unwrap()
