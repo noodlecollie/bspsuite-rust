@@ -1,5 +1,6 @@
-pub const NAME: &str = "DummyApi";
-pub const API_VERSION: usize = 1;
+use super::api_info::ApiInfo;
+
+pub const API_INFO: ApiInfo = ApiInfo::new("DummyApi", 1);
 
 #[repr(C)]
 pub struct DummyApi<'l>

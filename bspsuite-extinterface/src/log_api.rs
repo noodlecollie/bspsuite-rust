@@ -1,8 +1,8 @@
+use super::api_info::ApiInfo;
 use super::string_ref::StringRef;
 use log;
 
-pub const NAME: &str = "LogApi";
-pub const API_VERSION: usize = 1;
+pub const API_INFO: ApiInfo = ApiInfo::new("LogApi", 1);
 
 pub type GetLogLevelFilterFn = extern "C" fn() -> log::LevelFilter;
 pub type LogFn = extern "C" fn(&LogMessageArgs);

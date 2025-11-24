@@ -17,7 +17,7 @@ extern "C" fn probe(api: &mut probe_api::ProbeApi) -> probe_api::ProbeResult
 		entry_point: dummyapi_entry_point,
 	};
 
-	if let Err(_) = api.register_dummy_api_callbacks(dummy_api::API_VERSION, dummy_callbacks)
+	if let Err(_) = api.register_dummy_api_callbacks(dummy_api::API_INFO.version, dummy_callbacks)
 	{
 		error!("Failed to register for dummy API");
 		return probe_api::ProbeResult::Failure;
@@ -37,7 +37,7 @@ extern "C" fn dummyapi_entry_point(api: &mut dummy_api::DummyApi)
 fn set_up_logger(api: &mut probe_api::ProbeApi) -> bool
 {
 	return api
-		.request_log_api(log_api::API_VERSION)
+		.request_log_api(log_api::API_INFO.version)
 		.map(|api| ExtensionLogger::assign_static_logger(api).is_ok())
 		.is_ok();
 }

@@ -1,5 +1,3 @@
-use crate::probe_api::internal::ExportedApis;
-
 use super::string_ref::StringRef;
 use super::{dummy_api, log_api};
 use log::{error, trace};
@@ -54,7 +52,7 @@ impl<'l> ProbeApi<'l>
 		requested_version: usize,
 	) -> Result<log_api::LogApi, RequestError>
 	{
-		return ExportedApis::request_get_api(
+		return internal::ExportedApis::request_get_api(
 			self.extension_name.to_string().as_str(),
 			&mut self.apis.log_api,
 			requested_version,
@@ -67,7 +65,7 @@ impl<'l> ProbeApi<'l>
 		callbacks: dummy_api::DummyCallbacks,
 	) -> Result<(), RequestError>
 	{
-		return ExportedApis::request_set_callbacks(
+		return internal::ExportedApis::request_set_callbacks(
 			self.extension_name.to_string().as_str(),
 			&mut self.apis.dummy_api,
 			requested_version,
@@ -79,6 +77,7 @@ impl<'l> ProbeApi<'l>
 pub mod internal
 {
 	use super::*;
+	use crate::api_info::ApiInfo;
 
 	#[repr(C)]
 	pub enum ApiRequestError
@@ -116,11 +115,11 @@ pub mod internal
 	where
 		T: Clone,
 	{
-		pub fn new(name: &'static str, version: usize, api: T) -> Self
+		pub fn new(api_info: &ApiInfo, api: T) -> Self
 		{
 			return Self {
-				name: StringRef::from(name),
-				version: version,
+				name: StringRef::from(api_info.name),
+				version: api_info.version,
 				api: api,
 			};
 		}
@@ -151,11 +150,11 @@ pub mod internal
 
 	impl<T> CallbacksContainer<T>
 	{
-		pub fn new(name: &'static str, version: usize) -> Self
+		pub fn new(api_info: &ApiInfo) -> Self
 		{
 			return Self {
-				name: StringRef::from(name),
-				version: version,
+				name: StringRef::from(api_info.name),
+				version: api_info.version,
 				callbacks: None,
 			};
 		}

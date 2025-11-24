@@ -138,12 +138,8 @@ impl Extension
 	fn create_exported_apis() -> ExportedApis
 	{
 		return ExportedApis {
-			log_api: ApiProvider::new(
-				log_api::NAME,
-				log_api::API_VERSION,
-				api_impl::log_api::create_api(),
-			),
-			dummy_api: CallbacksContainer::new(dummy_api::NAME, dummy_api::API_VERSION),
+			log_api: ApiProvider::new(&log_api::API_INFO, api_impl::log_api::create_api()),
+			dummy_api: CallbacksContainer::new(&dummy_api::API_INFO),
 		};
 	}
 
