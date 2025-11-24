@@ -1,6 +1,6 @@
 use bspextifc::log_api::{self, ExtensionLogger};
 use bspextifc::{dummy_api, implement_extension_info, probe_api};
-use log::info;
+use log::{error, info};
 
 mod io;
 
@@ -13,6 +13,16 @@ extern "C" fn probe(api: &mut probe_api::ProbeApi) -> probe_api::ProbeResult
 		return probe_api::ProbeResult::Failure;
 	}
 
+	let dummy_callbacks: dummy_api::DummyCallbacks = dummy_api::DummyCallbacks {
+		entry_point: dummyapi_entry_point,
+	};
+
+	if let Err(_) = api.register_dummy_api_callbacks(dummy_api::API_VERSION, dummy_callbacks)
+	{
+		error!("Failed to register for dummy API");
+		return probe_api::ProbeResult::Failure;
+	}
+
 	return probe_api::ProbeResult::Success;
 }
 
@@ -20,6 +30,8 @@ extern "C" fn dummyapi_entry_point(api: &mut dummy_api::DummyApi)
 {
 	let magic_number: i32 = api.get_magic_number();
 	info!("Magic number from dummy API: {magic_number}");
+
+	api.store_number(99);
 }
 
 fn set_up_logger(api: &mut probe_api::ProbeApi) -> bool

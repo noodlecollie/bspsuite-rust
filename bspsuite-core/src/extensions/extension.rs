@@ -1,6 +1,6 @@
 use super::api_impl;
 use anyhow::{Context, Result, bail};
-use bspextifc::probe_api::internal::{ExportedApi, ExportedApis};
+use bspextifc::probe_api::internal::{ApiProvider, CallbacksContainer, ExportedApis};
 use bspextifc::{ExtensionInfo, SYMBOL_EXTENSION_INFO, dummy_api, log_api, probe_api};
 use libloading::{Library, Symbol};
 use log::{debug, trace};
@@ -113,12 +113,12 @@ impl Extension
 	fn create_exported_apis() -> ExportedApis
 	{
 		return ExportedApis {
-			log_api: ExportedApi::new(
+			log_api: ApiProvider::new(
 				log_api::NAME,
 				log_api::API_VERSION,
 				api_impl::log_api::create_api(),
-				(),
 			),
+			dummy_api: CallbacksContainer::new(dummy_api::NAME, dummy_api::API_VERSION),
 		};
 	}
 

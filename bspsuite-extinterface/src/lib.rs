@@ -6,6 +6,8 @@ pub mod log_api;
 pub mod probe_api;
 mod string_ref;
 
+pub use string_ref::StringRef;
+
 /// Struct whose sole responsibility is to expose a versioned entry point API to
 /// users of an extension.
 #[repr(C)]
@@ -19,6 +21,7 @@ pub struct ExtensionInfo
 /// information.
 pub const SYMBOL_EXTENSION_INFO: &[u8] = b"bspsuite_ext_info";
 
+// TODO: We need a version for the format of ExtensionInfo!
 #[macro_export]
 macro_rules! implement_extension_info {
 	($probe:expr) => {
