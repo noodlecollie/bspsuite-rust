@@ -1,7 +1,10 @@
 use super::api_impl;
 use anyhow::{Context, Result, bail};
 use bspextifc::probe_api::internal::{ApiProvider, CallbacksContainer, ExportedApis};
-use bspextifc::{ExtensionInfo, SYMBOL_EXTENSION_INFO, dummy_api, log_api, probe_api};
+use bspextifc::{
+	EXTENSION_INFO_VERSION, ExtensionInfo, ExtensionInfoVersionType, SYMBOL_EXTENSION_INFO,
+	SYMBOL_EXTENSION_INFO_VERSION, dummy_api, log_api, probe_api,
+};
 use libloading::{Library, Symbol};
 use log::{debug, trace};
 use std::ffi::CStr;
@@ -52,6 +55,21 @@ impl Extension
 	pub fn load(path: &PathBuf) -> Result<Self>
 	{
 		let library: Library = unsafe { Library::new(path.as_os_str()) }?;
+
+		let extension_info_version_symbol: UnsafeSymbol<&'static ExtensionInfoVersionType> =
+			unsafe { Extension::get_unsafe_symbol(&library, SYMBOL_EXTENSION_INFO_VERSION) }
+				.with_context(|| {
+					format!("Failed to look up extension info version symbol in extension library")
+				})?;
+
+		let extension_info_version: ExtensionInfoVersionType = **extension_info_version_symbol;
+
+		if extension_info_version != EXTENSION_INFO_VERSION
+		{
+			bail!(
+				"Expected extension info version {EXTENSION_INFO_VERSION} but got version {extension_info_version}"
+			);
+		}
 
 		let extension_info_symbol: UnsafeSymbol<&'static ExtensionInfo> =
 			unsafe { Extension::get_unsafe_symbol(&library, SYMBOL_EXTENSION_INFO) }.with_context(
