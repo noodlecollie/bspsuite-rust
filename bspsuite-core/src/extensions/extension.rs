@@ -1,5 +1,6 @@
 use super::api_impl;
 use anyhow::{Context, Result, bail};
+use bspextifc::probe_api::ProbeResult;
 use bspextifc::probe_api::internal::{ApiProvider, CallbacksContainer, ExportedApis};
 use bspextifc::{
 	EXTENSION_INFO_VERSION, ExtensionInfo, ExtensionInfoVersionType, SYMBOL_EXTENSION_INFO,
@@ -7,7 +8,6 @@ use bspextifc::{
 };
 use libloading::{Library, Symbol};
 use log::{debug, trace};
-use std::ffi::CStr;
 use std::path::PathBuf;
 use target_lexicon::{HOST, OperatingSystem};
 
@@ -122,9 +122,16 @@ impl Extension
 		let exported_apis: ExportedApis = Extension::create_exported_apis();
 		let mut probe = probe_api::ProbeApi::new(&self.name, exported_apis);
 
-		(self.extension_info.probe_fn)(&mut probe);
+		let probe_result: ProbeResult = (self.extension_info.probe_fn)(&mut probe);
 
 		// TODO: Go through each API and see if any errors were encountered.
+		// Also do something with any submitted callbacks
+
+		if let ProbeResult::Failure = probe_result
+		{
+			bail!("Extension {} failed probe call", self.name);
+		}
+
 		return Ok(());
 	}
 
