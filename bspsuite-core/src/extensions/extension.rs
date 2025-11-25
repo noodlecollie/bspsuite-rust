@@ -4,7 +4,7 @@ use bspextifc::probe_api::ProbeResult;
 use bspextifc::probe_api::internal::{ApiProvider, CallbacksContainer, ExportedApis};
 use bspextifc::{
 	EXTENSION_INFO_VERSION, ExtensionInfo, ExtensionInfoVersionType, SYMBOL_EXTENSION_INFO,
-	SYMBOL_EXTENSION_INFO_VERSION, dummy_api, log_api, probe_api,
+	SYMBOL_EXTENSION_INFO_VERSION, dummy_api, log_api, map_parser_api, probe_api,
 };
 use libloading::{Library, Symbol};
 use log::{debug, trace};
@@ -140,6 +140,7 @@ impl Extension
 		return ExportedApis {
 			log_api: ApiProvider::new(&log_api::API_INFO, api_impl::log_api::create_api()),
 			dummy_api: CallbacksContainer::new(&dummy_api::API_INFO),
+			map_parser_api: CallbacksContainer::new(&map_parser_api::API_INFO),
 		};
 	}
 

@@ -1,5 +1,5 @@
 use super::string_ref::StringRef;
-use super::{dummy_api, log_api};
+use super::{dummy_api, log_api, map_parser_api};
 use log::{error, trace};
 use std::result::Result;
 
@@ -109,6 +109,7 @@ pub mod internal
 	{
 		pub log_api: ApiProvider<log_api::LogApi>,
 		pub dummy_api: CallbacksContainer<dummy_api::DummyCallbacks>,
+		pub map_parser_api: CallbacksContainer<map_parser_api::MapParserCallbacks>,
 	}
 
 	impl<T> ApiProvider<T>

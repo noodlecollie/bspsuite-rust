@@ -2,10 +2,12 @@
 // https://users.rust-lang.org/t/linking-issues-when-designing-a-dynamic-plugin-based-architecture/136388
 
 mod api_info;
+mod string_ref;
+
 pub mod dummy_api;
 pub mod log_api;
+pub mod map_parser_api;
 pub mod probe_api;
-mod string_ref;
 
 pub use api_info::ApiInfo;
 pub use string_ref::StringRef;
