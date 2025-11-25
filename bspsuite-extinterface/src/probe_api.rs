@@ -34,12 +34,12 @@ pub enum ProbeResult
 pub struct ProbeApi<'l>
 {
 	extension_name: StringRef<'l>,
-	apis: internal::ExportedApis,
+	apis: &'l mut internal::ExportedApis,
 }
 
 impl<'l> ProbeApi<'l>
 {
-	pub fn new(extension_name: &'l str, apis: internal::ExportedApis) -> ProbeApi<'l>
+	pub fn new(extension_name: &'l str, apis: &'l mut internal::ExportedApis) -> ProbeApi<'l>
 	{
 		return ProbeApi {
 			extension_name: StringRef::from(extension_name),

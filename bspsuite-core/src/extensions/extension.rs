@@ -19,6 +19,7 @@ pub use libloading::os::windows::Symbol as UnsafeSymbol;
 struct ApiCallbacks
 {
 	dummy_api_callbacks: Option<dummy_api::DummyCallbacks>,
+	map_parser_api_callbacks: Option<map_parser_api::MapParserCallbacks>,
 }
 
 impl Default for ApiCallbacks
@@ -27,6 +28,7 @@ impl Default for ApiCallbacks
 	{
 		return Self {
 			dummy_api_callbacks: None,
+			map_parser_api_callbacks: None,
 		};
 	}
 }
@@ -119,20 +121,35 @@ impl Extension
 
 	pub fn probe(&mut self) -> Result<()>
 	{
-		let exported_apis: ExportedApis = Extension::create_exported_apis();
-		let mut probe = probe_api::ProbeApi::new(&self.name, exported_apis);
+		let result: Result<ExportedApis> = self.probe_and_return_callbacks();
+
+		if let Err(err) = result
+		{
+			return Err(err);
+		}
+
+		self.api_callbacks = result.map_or(ApiCallbacks::default(), |callbacks| ApiCallbacks {
+			dummy_api_callbacks: callbacks.dummy_api.take_callbacks(),
+			map_parser_api_callbacks: callbacks.map_parser_api.take_callbacks(),
+		});
+
+		return Ok(());
+	}
+
+	fn probe_and_return_callbacks(&self) -> Result<ExportedApis>
+	{
+		let mut exported_apis: ExportedApis = Extension::create_exported_apis();
+		let mut probe: probe_api::ProbeApi =
+			probe_api::ProbeApi::new(&self.name, &mut exported_apis);
 
 		let probe_result: ProbeResult = (self.extension_info.probe_fn)(&mut probe);
-
-		// TODO: Go through each API and see if any errors were encountered.
-		// Also do something with any submitted callbacks
 
 		if let ProbeResult::Failure = probe_result
 		{
 			bail!("Extension {} failed probe call", self.name);
 		}
 
-		return Ok(());
+		return Ok(exported_apis);
 	}
 
 	fn create_exported_apis() -> ExportedApis
