@@ -16,7 +16,7 @@ pub use libloading::os::unix::Symbol as UnsafeSymbol;
 #[cfg(target_os = "windows")]
 pub use libloading::os::windows::Symbol as UnsafeSymbol;
 
-struct ApiCallbacks
+pub struct ApiCallbacks
 {
 	dummy_api_callbacks: Option<dummy_api::DummyCallbacks>,
 	map_parser_api_callbacks: Option<map_parser_api::MapParserCallbacks>,
@@ -117,6 +117,11 @@ impl Extension
 	pub fn get_name(&self) -> &str
 	{
 		return &self.name;
+	}
+
+	pub fn get_api_callbacks(&self) -> &ApiCallbacks
+	{
+		return &self.api_callbacks;
 	}
 
 	pub fn probe(&mut self) -> Result<()>

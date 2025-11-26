@@ -17,8 +17,21 @@ where
 		Ok(result_code) => result_code,
 		Err(err) =>
 		{
-			let prefix: String = colorize_string("<u><b><red>Fatal Error</red></b></u>");
-			error!("{prefix}\n{:?}", err);
+			let banner: String = colorize_string("<u><b><red>***** CRITICAL FAILURE *****</>");
+
+			// TODO: Does the project configuration support setting a repo?
+			// Can we use an environment variable to fetch the URL?
+			error!(
+				"\n
+				{banner}\n
+				The compiler has encountered an unrecoverable error and halted.\n
+				Please create an issue report at https://github.com/noodlecollie/bspsuite/issues/\n
+				and include the following information:\n
+				\n
+				{:?}",
+				err
+			);
+
 			ResultCode::InternalError
 		}
 	};

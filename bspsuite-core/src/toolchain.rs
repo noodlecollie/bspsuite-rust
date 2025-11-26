@@ -1,13 +1,13 @@
 use super::extensions::ExtensionList;
 use std::path::PathBuf;
 
-pub struct CompilerState
+pub struct Toolchain
 {
-	toolchain_root: PathBuf,
+	root: PathBuf,
 	extensions: ExtensionList,
 }
 
-impl CompilerState
+impl Toolchain
 {
 	pub fn new(toolchain_root: &Option<PathBuf>) -> Self
 	{
@@ -17,13 +17,18 @@ impl CompilerState
 		}
 		else
 		{
-			CompilerState::infer_toolchain_root()
+			Toolchain::infer_toolchain_root()
 		};
 
 		return Self {
-			toolchain_root: root_path.clone(),
+			root: root_path.clone(),
 			extensions: ExtensionList::new(&root_path),
 		};
+	}
+
+	pub fn extensions(&self) -> &ExtensionList
+	{
+		return &self.extensions;
 	}
 
 	fn infer_toolchain_root() -> PathBuf

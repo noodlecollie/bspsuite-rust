@@ -74,11 +74,13 @@ impl<'l> ProbeApi<'l>
 	}
 }
 
+#[doc(hidden)]
 pub mod internal
 {
 	use super::*;
 	use crate::api_info::ApiInfo;
 
+	#[doc(hidden)]
 	#[repr(C)]
 	pub enum ApiRequestError
 	{
@@ -86,6 +88,7 @@ pub mod internal
 		MismatchedVersion((usize, usize)),
 	}
 
+	#[doc(hidden)]
 	#[repr(C)]
 	pub struct ApiProvider<T>
 	where
@@ -96,6 +99,7 @@ pub mod internal
 		api: T,
 	}
 
+	#[doc(hidden)]
 	#[repr(C)]
 	pub struct CallbacksContainer<T>
 	{
@@ -104,6 +108,7 @@ pub mod internal
 		callbacks: Option<T>,
 	}
 
+	#[doc(hidden)]
 	#[repr(C)]
 	pub struct ExportedApis
 	{
@@ -112,10 +117,12 @@ pub mod internal
 		pub map_parser_api: CallbacksContainer<map_parser_api::MapParserCallbacks>,
 	}
 
+	#[doc(hidden)]
 	impl<T> ApiProvider<T>
 	where
 		T: Clone,
 	{
+		#[doc(hidden)]
 		pub fn new(api_info: &ApiInfo, api: T) -> Self
 		{
 			return Self {
@@ -125,16 +132,19 @@ pub mod internal
 			};
 		}
 
+		#[doc(hidden)]
 		pub fn get_name(&self) -> String
 		{
 			return self.name.to_string();
 		}
 
+		#[doc(hidden)]
 		pub fn get_version(&self) -> usize
 		{
 			return self.version;
 		}
 
+		#[doc(hidden)]
 		pub fn request_get_api(&self, requested_version: usize) -> Result<T, ApiRequestError>
 		{
 			if requested_version != self.version
@@ -149,8 +159,10 @@ pub mod internal
 		}
 	}
 
+	#[doc(hidden)]
 	impl<T> CallbacksContainer<T>
 	{
+		#[doc(hidden)]
 		pub fn new(api_info: &ApiInfo) -> Self
 		{
 			return Self {
@@ -160,16 +172,19 @@ pub mod internal
 			};
 		}
 
+		#[doc(hidden)]
 		pub fn get_name(&self) -> String
 		{
 			return self.name.to_string();
 		}
 
+		#[doc(hidden)]
 		pub fn get_version(&self) -> usize
 		{
 			return self.version;
 		}
 
+		#[doc(hidden)]
 		pub fn request_set_callbacks(
 			&mut self,
 			requested_version: usize,
@@ -188,14 +203,17 @@ pub mod internal
 			return Ok(());
 		}
 
+		#[doc(hidden)]
 		pub fn take_callbacks(self) -> Option<T>
 		{
 			return self.callbacks;
 		}
 	}
 
+	#[doc(hidden)]
 	impl ExportedApis
 	{
+		#[doc(hidden)]
 		pub fn request_get_api<T>(
 			extension_name: &str,
 			provider: &mut ApiProvider<T>,
@@ -212,6 +230,7 @@ pub mod internal
 			);
 		}
 
+		#[doc(hidden)]
 		pub fn request_set_callbacks<T>(
 			extension_name: &str,
 			container: &mut CallbacksContainer<T>,
@@ -227,6 +246,7 @@ pub mod internal
 			);
 		}
 
+		#[doc(hidden)]
 		pub fn process_result<T>(
 			extension_name: &str,
 			api_name: &str,

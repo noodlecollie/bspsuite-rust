@@ -1,9 +1,11 @@
 use const_cstr::{ConstCStr, const_cstr};
 use constcat::concat;
 
-mod compiler_state;
+mod compiler_error;
 mod extensions;
 mod model;
+mod toolchain;
+mod work_units;
 
 pub mod commands;
 
