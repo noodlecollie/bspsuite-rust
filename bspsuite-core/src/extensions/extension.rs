@@ -4,7 +4,7 @@ use bspextifc::probe_api::ProbeResult;
 use bspextifc::probe_api::internal::{ApiProvider, CallbacksContainer, ExportedApis};
 use bspextifc::{
 	EXTENSION_INFO_VERSION, ExtensionInfo, ExtensionInfoVersionType, SYMBOL_EXTENSION_INFO,
-	SYMBOL_EXTENSION_INFO_VERSION, dummy_api, log_api, map_parser_api, probe_api,
+	SYMBOL_EXTENSION_INFO_VERSION, dummy_api, log_api, probe_api,
 };
 use libloading::{Library, Symbol};
 use log::{debug, trace};
@@ -18,8 +18,7 @@ pub use libloading::os::windows::Symbol as UnsafeSymbol;
 
 pub struct ApiCallbacks
 {
-	dummy_api_callbacks: Option<dummy_api::DummyCallbacks>,
-	map_parser_api_callbacks: Option<map_parser_api::MapParserCallbacks>,
+	pub dummy_api_callbacks: Option<dummy_api::DummyCallbacks>,
 }
 
 impl Default for ApiCallbacks
@@ -28,7 +27,6 @@ impl Default for ApiCallbacks
 	{
 		return Self {
 			dummy_api_callbacks: None,
-			map_parser_api_callbacks: None,
 		};
 	}
 }
@@ -135,7 +133,6 @@ impl Extension
 
 		self.api_callbacks = result.map_or(ApiCallbacks::default(), |callbacks| ApiCallbacks {
 			dummy_api_callbacks: callbacks.dummy_api.take_callbacks(),
-			map_parser_api_callbacks: callbacks.map_parser_api.take_callbacks(),
 		});
 
 		return Ok(());
@@ -145,7 +142,7 @@ impl Extension
 	{
 		let mut exported_apis: ExportedApis = Extension::create_exported_apis();
 		let mut probe: probe_api::ProbeApi =
-			probe_api::ProbeApi::new(&self.name, &mut exported_apis);
+			probe_api::internal::create_probe_api(&self.name, &mut exported_apis);
 
 		let probe_result: ProbeResult = (self.extension_info.probe_fn)(&mut probe);
 
@@ -162,7 +159,6 @@ impl Extension
 		return ExportedApis {
 			log_api: ApiProvider::new(&log_api::API_INFO, api_impl::log_api::create_api()),
 			dummy_api: CallbacksContainer::new(&dummy_api::API_INFO),
-			map_parser_api: CallbacksContainer::new(&map_parser_api::API_INFO),
 		};
 	}
 

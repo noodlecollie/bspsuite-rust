@@ -6,7 +6,6 @@ mod string_ref;
 
 pub mod dummy_api;
 pub mod log_api;
-pub mod map_parser_api;
 pub mod probe_api;
 
 pub use api_info::ApiInfo;

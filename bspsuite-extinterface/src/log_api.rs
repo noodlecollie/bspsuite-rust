@@ -4,15 +4,12 @@ use log;
 
 pub const API_INFO: ApiInfo = ApiInfo::new("LogApi", 1);
 
-pub type GetLogLevelFilterFn = extern "C" fn() -> log::LevelFilter;
-pub type LogFn = extern "C" fn(&LogMessageArgs);
-
 #[repr(C)]
 #[derive(Clone)]
 pub struct LogApi
 {
-	pub get_log_level_filter_fn: GetLogLevelFilterFn,
-	pub log_fn: LogFn,
+	pub get_log_level_filter_fn: extern "C" fn() -> log::LevelFilter,
+	pub log_fn: extern "C" fn(&LogMessageArgs),
 }
 
 #[repr(C)]

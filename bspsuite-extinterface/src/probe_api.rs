@@ -1,5 +1,5 @@
 use super::string_ref::StringRef;
-use super::{dummy_api, log_api, map_parser_api};
+use super::{dummy_api, log_api};
 use log::{error, trace};
 use std::result::Result;
 
@@ -39,14 +39,6 @@ pub struct ProbeApi<'l>
 
 impl<'l> ProbeApi<'l>
 {
-	pub fn new(extension_name: &'l str, apis: &'l mut internal::ExportedApis) -> ProbeApi<'l>
-	{
-		return ProbeApi {
-			extension_name: StringRef::from(extension_name),
-			apis: apis,
-		};
-	}
-
 	pub fn request_log_api(
 		&mut self,
 		requested_version: usize,
@@ -114,7 +106,6 @@ pub mod internal
 	{
 		pub log_api: ApiProvider<log_api::LogApi>,
 		pub dummy_api: CallbacksContainer<dummy_api::DummyCallbacks>,
-		pub map_parser_api: CallbacksContainer<map_parser_api::MapParserCallbacks>,
 	}
 
 	#[doc(hidden)]
@@ -281,5 +272,16 @@ pub mod internal
 				}
 			});
 		}
+	}
+
+	pub fn create_probe_api<'l>(
+		extension_name: &'l str,
+		apis: &'l mut internal::ExportedApis,
+	) -> ProbeApi<'l>
+	{
+		return ProbeApi {
+			extension_name: StringRef::from(extension_name),
+			apis: apis,
+		};
 	}
 }
