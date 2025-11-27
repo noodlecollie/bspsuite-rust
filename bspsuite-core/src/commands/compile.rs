@@ -17,7 +17,7 @@ pub extern "C" fn bspcore_run_compile(args: &CompileArgs) -> ResultCode
 	return wrap_panics(|| {
 		let toolchain: Toolchain = Toolchain::new(&args.base.toolchain_root);
 
-		// TODO: Continue here
+		// TODO
 
 		info!("Compile complete");
 		return ResultCode::Ok;
