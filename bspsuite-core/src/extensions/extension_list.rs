@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use std::fs;
 use std::path::PathBuf;
+use std::slice::{Iter, IterMut};
 
 use super::extension::Extension;
 use log::{debug, warn};
@@ -20,6 +21,16 @@ impl ExtensionList
 
 		out.load_extensions_from(toolchain_root);
 		return out;
+	}
+
+	pub fn iter(&self) -> Iter<'_, Extension>
+	{
+		return self.extensions.iter();
+	}
+
+	pub fn iter_mut(&mut self) -> IterMut<'_, Extension>
+	{
+		return self.extensions.iter_mut();
 	}
 
 	fn load_extensions_from(&mut self, toolchain_root: &PathBuf)

@@ -31,6 +31,7 @@ extern "C" fn dummyapi_entry_point(api: &mut dummy_api::DummyApi)
 	let magic_number: i32 = api.get_magic_number();
 	info!("Magic number from dummy API: {magic_number}");
 
+	info!("Storing number 99 in dummy API");
 	api.store_number(99);
 }
 
